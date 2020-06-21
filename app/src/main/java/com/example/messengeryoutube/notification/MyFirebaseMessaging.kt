@@ -14,6 +14,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import com.squareup.moshi.Moshi
 
 
 class MyFirebaseMessaging: FirebaseMessagingService() {
@@ -30,12 +31,21 @@ class MyFirebaseMessaging: FirebaseMessagingService() {
     }
 
     private fun sendNotification(remoteMessage: RemoteMessage) {
-        val message = if (remoteMessage.data["body"] != null) remoteMessage.data["body"] else "null"
-        val title = if (remoteMessage.data["title"] != null) remoteMessage.data["title"] else "null"
+        val message = remoteMessage.data["body"]
+        val title   = remoteMessage.data["title"]
+        val currentUserJson = remoteMessage.data["currentUser"]
+        val interlocutorUserJson = remoteMessage.data["interlocutorUser"]
         val noti = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        //val notificationMessage = NotificationMessage(currentUser = toUser!!,toUser = currentUser!!)
-        val myNotification = NotificationMessage.createNotification(this, title!!,message!!)
-        val channel = NotificationMessage.createNotificationChannel(this)
+
+        //convert users from JSON
+        val moshi = Moshi.Builder().build()
+        val jsonAdapter = moshi.adapter(User::class.java)
+        val currentUser = jsonAdapter.fromJson(currentUserJson!!)
+        val interlocutorUser = jsonAdapter.fromJson(interlocutorUserJson!!)
+
+        val notificationMessage = NotificationMessage(currentUser = interlocutorUser!!,interlocutorUser = currentUser!!)
+        val myNotification = notificationMessage.createNotification(this, title!!,message!!)
+        val channel = notificationMessage.createNotificationChannel(this)
         if (channel != null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 noti.createNotificationChannel(channel)

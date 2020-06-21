@@ -21,11 +21,12 @@ class NotificationMessage(val currentUser: User,val interlocutorUser: User) {
         const val CHANNEL_NAME = "пока такое имя"
         const val CHANNEL_DESCRIPTION = "пока такое описание"
         const val PENDING_INTENT_ID = 1
+    }
 
         fun createNotification(context: Context,userName: String,message: String): Notification {
-            val intent = Intent(context,LatestMessagesActivity::class.java)
-            //intent.putExtra(NewMessageActivity.INTERLOCUTOR_USER,toUser)
-            //intent.putExtra(LatestMessagesActivity.CURRENT_USER_KEY,currentUser)
+            val intent = Intent(context,ChatLogActivity::class.java)
+            intent.putExtra(NewMessageActivity.INTERLOCUTOR_USER,interlocutorUser)
+            intent.putExtra(LatestMessagesActivity.CURRENT_USER_KEY,currentUser)
             val pendingIntent = PendingIntent.getActivity(context, PENDING_INTENT_ID,intent,PendingIntent.FLAG_UPDATE_CURRENT)
             return NotificationCompat.Builder(context, CHANNEL_ID)
                 .setAutoCancel(true)
@@ -58,5 +59,4 @@ class NotificationMessage(val currentUser: User,val interlocutorUser: User) {
             }
             return null
         }
-    }
 }

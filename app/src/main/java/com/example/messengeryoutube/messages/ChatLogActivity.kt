@@ -20,6 +20,8 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import com.example.messengeryoutube.R
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.Moshi
 
 
 class ChatLogActivity : AppCompatActivity() {
@@ -143,8 +145,14 @@ class ChatLogActivity : AppCompatActivity() {
             query.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 for(snapShot in dataSnapshot.children) {
+                    //convert users to json
+                    val moshi = Moshi.Builder().build()
+                    val jsonAdapter = moshi.adapter(User::class.java)
+                    val jsonCurrentUser = jsonAdapter.toJson(currentUser)
+                    val jsonInterlocutorUser = jsonAdapter.toJson(interlocutorUser)
+
                     val token = snapShot.getValue(Token::class.java)
-                    val dataMessage = DataMessage(userName,message)
+                    val dataMessage = DataMessage(userName,message,jsonCurrentUser,jsonInterlocutorUser)
                     val sender = Sender(dataMessage,token!!.token)
 
                     apiService.sendNotification(sender).enqueue(object: Callback<MyResponse?>{
