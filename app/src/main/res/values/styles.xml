@@ -1,0 +1,43 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/primaryLightColor</item>
+        <item name="colorPrimaryDark">@color/primaryDarkColor</item>
+        <item name="colorAccent">@color/secondaryColor</item>
+    </style>
+
+    <style name="EditTextRegistration">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">@dimen/editText_registration_size</item>
+        <item name="android:ems">10</item>
+        <item name="android:background">@drawable/rounded_edit_text_registration</item>
+        <item name="android:paddingTop">15dp</item>
+        <item name="android:paddingBottom">15dp</item>
+        <item name="android:paddingLeft">15dp</item>
+    </style>
+
+    <style name="ButtonRegistration">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingLeft">30dp</item>
+        <item name="android:paddingRight">30dp</item>
+        <item name="android:background">@drawable/rounded_button_registration</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:layout_marginTop">15dp</item>
+    </style>
+
+    <style name="ButtonSelectPhoto">
+        <item name="android:layout_width">170dp</item>
+        <item name="android:layout_height">170dp</item>
+        <item name="android:paddingLeft">25dp</item>
+        <item name="android:paddingRight">25dp</item>
+        <item name="android:paddingTop">75dp</item>
+        <item name="android:paddingBottom">60dp</item>
+        <item name="android:background">@drawable/rounded_button_select_photo</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+
+</resources>

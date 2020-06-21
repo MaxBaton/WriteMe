@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/mainActivity_background"
+    tools:context=".registration.LoginActivity" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:layout_marginTop="140dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <EditText
+            android:id="@+id/editText_email_registration"
+            style="@style/EditTextRegistration"
+            android:layout_marginTop="110dp"
+            android:hint="@string/hint_editText_email"
+            android:inputType="textEmailAddress" />
+
+        <EditText
+            android:id="@+id/editText_password_registration"
+            style="@style/EditTextRegistration"
+            android:layout_marginTop="10dp"
+            android:hint="@string/hint_editText_password"
+            android:inputType="textPassword" />
+
+        <Button
+            android:id="@+id/btn_log_in"
+            style="@style/ButtonRegistration"
+            android:text="@string/log_in_button" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
