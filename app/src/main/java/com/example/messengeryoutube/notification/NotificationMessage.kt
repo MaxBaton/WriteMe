@@ -14,7 +14,7 @@ import com.example.messengeryoutube.messages.LatestMessagesActivity
 import com.example.messengeryoutube.messages.NewMessageActivity
 import com.example.messengeryoutube.registration.User
 
-class NotificationMessage(val currentUser: User,val toUser: User) {
+class NotificationMessage(val currentUser: User,val interlocutorUser: User) {
     companion object{
         const val CHANNEL_ID = "channel notification message (id)"
         const val NOTIFICATION_ID = 1

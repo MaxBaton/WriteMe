@@ -1,11 +1,9 @@
 package com.example.messengeryoutube.messages
 
-import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.bumptech.glide.Glide
 import com.example.messengeryoutube.databinding.ActivityChatLogBinding
 import com.example.messengeryoutube.notification.*
@@ -27,7 +25,7 @@ import com.example.messengeryoutube.R
 class ChatLogActivity : AppCompatActivity() {
     private lateinit var binding: ActivityChatLogBinding
     private val groupAdapter = GroupAdapter<GroupieViewHolder>()
-    private var toUser: User? = null
+    private var interlocutorUser: User? = null
     private var currentUser: User? = null
     private lateinit var apiService: APIService
     private var notify: Boolean = false
@@ -37,10 +35,10 @@ class ChatLogActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        toUser = intent.getParcelableExtra(NewMessageActivity.INTERLOCUTOR_USER)
+        interlocutorUser = intent.getParcelableExtra(NewMessageActivity.INTERLOCUTOR_USER)
         currentUser = intent.getParcelableExtra(LatestMessagesActivity.CURRENT_USER_KEY)
         apiService = Client.getClient("https://fcm.googleapis.com/")!!.create(APIService::class.java)
-        tuneActionBar(toUser!!.userName)
+        tuneActionBar(interlocutorUser!!.userName)
 
         binding = ActivityChatLogBinding.inflate(layoutInflater)
         with(binding) {
@@ -64,8 +62,8 @@ class ChatLogActivity : AppCompatActivity() {
 
     private fun listenForMessages() {
         val fromUserId = currentUser!!.id
-        val toUserId = toUser!!.id
-        val ref = FirebaseDatabase.getInstance().getReference("/users_messages/$fromUserId/$toUserId")
+        val interlocutorUserId = interlocutorUser!!.id
+        val ref = FirebaseDatabase.getInstance().getReference("/users_messages/$fromUserId/$interlocutorUserId")
 
         ref.addChildEventListener(object: ChildEventListener{
             override fun onChildAdded(p0: DataSnapshot, p1: String?) {
@@ -99,20 +97,20 @@ class ChatLogActivity : AppCompatActivity() {
 
     private fun performSendMessage(text: String) {
         val fromUserId = currentUser!!.id
-        val toUserId = toUser!!.id
-        val currentUserReference = FirebaseDatabase.getInstance().getReference("/users_messages/$fromUserId/$toUserId").push()
-        val toUserReference = FirebaseDatabase.getInstance().getReference("/users_messages/$toUserId/$fromUserId").push()
+        val interlocutorUserId = interlocutorUser!!.id
+        val currentUserReference = FirebaseDatabase.getInstance().getReference("/users_messages/$fromUserId/$interlocutorUserId").push()
+        val interlocutorUserReference = FirebaseDatabase.getInstance().getReference("/users_messages/$interlocutorUserId/$fromUserId").push()
         if (currentUserReference.key == null) return
 
-        val chatMessage = ChatMessage(currentUserReference.key!!,text, fromUserId,toUserId,System.currentTimeMillis()/1000)
+        val chatMessage = ChatMessage(currentUserReference.key!!,text, fromUserId,interlocutorUserId,System.currentTimeMillis()/1000)
         currentUserReference.setValue(chatMessage).addOnSuccessListener {
             binding.editTextPutMessage.text.clear()
             binding.recyclerViewChat.scrollToPosition(groupAdapter.itemCount - 1)
         }
-        toUserReference.setValue(chatMessage)
+        interlocutorUserReference.setValue(chatMessage)
 
-        val latestMessageReference = FirebaseDatabase.getInstance().getReference("/latest_messages/$fromUserId/$toUserId")
-        val latestMessageToReference = FirebaseDatabase.getInstance().getReference("/latest_messages/$toUserId/$fromUserId")
+        val latestMessageReference = FirebaseDatabase.getInstance().getReference("/latest_messages/$fromUserId/$interlocutorUserId")
+        val latestMessageToReference = FirebaseDatabase.getInstance().getReference("/latest_messages/$interlocutorUserId/$fromUserId")
         latestMessageReference.setValue(chatMessage)
         latestMessageToReference.setValue(chatMessage)
 
@@ -127,7 +125,7 @@ class ChatLogActivity : AppCompatActivity() {
             override fun onDataChange(p0: DataSnapshot) {
                 val user = p0.getValue(User::class.java)
                 if (notify) {
-                    sendNotifiaction(toUserId, user!!.userName, message);
+                    sendNotifiaction(interlocutorUserId, user!!.userName, message);
                 }
                 notify = false;
             }
@@ -191,7 +189,7 @@ class ChatLogActivity : AppCompatActivity() {
 
             Glide
                 .with(this@ChatLogActivity)
-                .load(toUser!!.imageUrl)
+                .load(interlocutorUser!!.imageUrl)
                 .into(viewHolder.itemView.circle_image_view_my_avatar_in_chat)
         }
     }

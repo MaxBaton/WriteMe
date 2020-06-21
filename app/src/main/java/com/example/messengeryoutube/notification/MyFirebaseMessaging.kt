@@ -17,8 +17,8 @@ import com.google.firebase.messaging.RemoteMessage
 
 
 class MyFirebaseMessaging: FirebaseMessagingService() {
-    private var currentUser: User? = null
-    private var toUser: User? = null
+//    private var currentUser: User? = null
+//    private var interlocutorUser: User? = null
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)

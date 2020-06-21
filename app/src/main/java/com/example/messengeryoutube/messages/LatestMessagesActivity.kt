@@ -46,9 +46,9 @@ class LatestMessagesActivity : AppCompatActivity() {
                 DividerItemDecoration(this@LatestMessagesActivity,DividerItemDecoration.VERTICAL))
         }
         groupAdapter.setOnItemClickListener { item, _ ->
-            val toUser = item as LatestMessageItem
+            val interlocutorUser = item as LatestMessageItem
             val intent = Intent(this,ChatLogActivity::class.java)
-            intent.putExtra(NewMessageActivity.INTERLOCUTOR_USER,toUser.interlocutorUser)
+            intent.putExtra(NewMessageActivity.INTERLOCUTOR_USER,interlocutorUser.interlocutorUser)
             intent.putExtra(CURRENT_USER_KEY,currentUser)
             startActivity(intent)
         }
