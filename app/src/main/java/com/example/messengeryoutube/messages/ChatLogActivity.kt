@@ -20,7 +20,6 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import com.example.messengeryoutube.R
-import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 
 
@@ -31,9 +30,7 @@ class ChatLogActivity : AppCompatActivity() {
     private var currentUser: User? = null
     private lateinit var apiService: APIService
     private var notify: Boolean = false
-
-    //пока так, но лучше, конечно же, исправить
-
+    private var isInterlocutorInChat: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,6 +57,31 @@ class ChatLogActivity : AppCompatActivity() {
         }
 
         listenForMessages()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        setUserInChatFlag(true)
+
+        val referenceInterlocutorInChat = FirebaseDatabase.getInstance().getReference("/user_in_chat")
+        referenceInterlocutorInChat.addValueEventListener(object: ValueEventListener{
+            override fun onCancelled(p0: DatabaseError) {
+                TODO("Not yet implemented")
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                for (p in p0.children) {
+                    if (p.key == interlocutorUser!!.id) {
+                        isInterlocutorInChat = p.getValue(Boolean::class.java)!!
+                    }
+                }
+            }
+        })
+    }
+
+    private fun setUserInChatFlag(isUserInChat: Boolean) {
+        val refUserInChat = FirebaseDatabase.getInstance().getReference("/user_in_chat")
+        refUserInChat.child(currentUser!!.id).setValue(isUserInChat)
     }
 
     private fun listenForMessages() {
@@ -115,7 +137,6 @@ class ChatLogActivity : AppCompatActivity() {
         val latestMessageToReference = FirebaseDatabase.getInstance().getReference("/latest_messages/$interlocutorUserId/$fromUserId")
         latestMessageReference.setValue(chatMessage)
         latestMessageToReference.setValue(chatMessage)
-
         val message = chatMessage.text
 
         val reference = FirebaseDatabase.getInstance().getReference("/users").child(FirebaseAuth.getInstance().currentUser!!.uid)
@@ -126,7 +147,7 @@ class ChatLogActivity : AppCompatActivity() {
 
             override fun onDataChange(p0: DataSnapshot) {
                 val user = p0.getValue(User::class.java)
-                if (notify) {
+                if (notify && !isInterlocutorInChat) {
                     sendNotifiaction(interlocutorUserId, user!!.userName, message);
                 }
                 notify = false;
@@ -187,6 +208,11 @@ class ChatLogActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if(item.itemId == android.R.id.home) finish()
         return super.onOptionsItemSelected(item)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        setUserInChatFlag(false)
     }
 
     inner class InterlocutorChatItem(val text: String) : Item<GroupieViewHolder>() {
