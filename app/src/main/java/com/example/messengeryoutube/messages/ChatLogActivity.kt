@@ -1,5 +1,8 @@
 package com.example.messengeryoutube.messages
 
+import android.app.NotificationManager
+import android.content.Context
+import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.MenuItem
@@ -61,6 +64,8 @@ class ChatLogActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancel(NotificationMessage.NOTIFICATION_ID)
         setUserInChatFlag(true)
 
         val referenceInterlocutorInChat = FirebaseDatabase.getInstance().getReference("/user_in_chat")

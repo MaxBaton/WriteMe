@@ -16,15 +16,11 @@
         <activity android:name=".messages.EditProfileActivity" />
         <activity
             android:name=".messages.NewMessageActivity"
-            android:launchMode="singleTop">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".messages.LatestMessagesActivity" />
+            android:launchMode="singleTop"
+            android:parentActivityName=".messages.LatestMessagesActivity">
         </activity>
-        <activity android:name=".messages.ChatLogActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".messages.NewMessageActivity" />
+        <activity android:name=".messages.ChatLogActivity"
+            android:parentActivityName=".messages.LatestMessagesActivity">
         </activity>
         <activity
             android:name=".messages.LatestMessagesActivity"
@@ -37,15 +33,6 @@
         </activity>
         <activity android:name=".registration.MainActivity" />
         <activity android:name=".registration.LoginActivity" />
-
-<!--        <service android:name=".notification.MyFirebaseIdService"-->
-<!--            android:enabled="true"-->
-<!--            android:exported="true">-->
-<!--            <intent-filter>-->
-<!--                <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>-->
-<!--            </intent-filter>-->
-<!--        </service>-->
-
         <service android:name=".notification.MyFirebaseMessaging"
             android:enabled="true"
             android:exported="true"

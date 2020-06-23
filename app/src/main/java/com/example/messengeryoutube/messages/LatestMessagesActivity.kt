@@ -10,6 +10,7 @@ import com.bumptech.glide.Glide
 import com.example.messengeryoutube.CustomActionBar
 import com.example.messengeryoutube.R
 import com.example.messengeryoutube.databinding.ActivityLatestMessagesBinding
+import com.example.messengeryoutube.notification.NotificationMessage
 import com.example.messengeryoutube.notification.Token
 import com.example.messengeryoutube.registration.MainActivity
 import com.example.messengeryoutube.registration.User
@@ -35,6 +36,7 @@ class LatestMessagesActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         verificationExistingUser()
+       // verificationFromNotification() // исправить, не работает, если пользователь находиьтся в LatestMessagesActivity
         CustomActionBar.latestMessagesActivityActionBar(this,editMenu)
 
         binding = ActivityLatestMessagesBinding.inflate(layoutInflater)
