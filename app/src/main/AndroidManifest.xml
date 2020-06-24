@@ -35,7 +35,7 @@
         <activity android:name=".registration.LoginActivity" />
         <service android:name=".notification.MyFirebaseMessaging"
             android:enabled="true"
-            android:exported="true"
+            android:exported="false"
             android:permission="com.google.android.c2dm.permission.RECEIVE">
             <intent-filter>
                 <action android:name="MyUsers"/>

@@ -95,7 +95,7 @@ class LatestMessagesActivity : AppCompatActivity() {
         latestMessagesHashMap[p0.key!!] = chatMessage
 
         groupAdapter.clear()
-        latestMessagesHashMap.values.forEach { groupAdapter.add(LatestMessageItem(it)) }
+        latestMessagesHashMap.values.sortedByDescending { it.timestamp }.forEach { groupAdapter.add(LatestMessageItem(it)) }
     }
 
     private fun fetchCurrentUser() {
