@@ -19,6 +19,19 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:src="@tools:sample/avatars" />
 
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/circle_image_view_new_message_activity_status_user"
+        android:layout_width="15dp"
+        android:layout_height="15dp"
+        android:layout_marginStart="84dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="8dp"
+        android:src="@mipmap/ic_launcher"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
+
     <TextView
         android:id="@+id/text_view_user_name"
         android:layout_width="wrap_content"

@@ -4,13 +4,13 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.bumptech.glide.Glide
 import com.example.messengeryoutube.CustomActionBar
 import com.example.messengeryoutube.R
 import com.example.messengeryoutube.databinding.ActivityLatestMessagesBinding
-import com.example.messengeryoutube.notification.NotificationMessage
 import com.example.messengeryoutube.notification.Token
 import com.example.messengeryoutube.registration.MainActivity
 import com.example.messengeryoutube.registration.User
@@ -54,13 +54,13 @@ class LatestMessagesActivity : AppCompatActivity() {
             intent.putExtra(CURRENT_USER_KEY,currentUser)
             startActivity(intent)
         }
-        listenForLatestMessages()
         updateToken(FirebaseInstanceId.getInstance().token)
     }
 
     override fun onStart() {
         super.onStart()
         fetchCurrentUser()
+        listenForLatestMessages()
     }
 
     private fun listenForLatestMessages() {
@@ -86,16 +86,17 @@ class LatestMessagesActivity : AppCompatActivity() {
             override fun onChildRemoved(p0: DataSnapshot) {
                 TODO("Not yet implemented")
             }
-
         })
     }
 
-    private fun fillAndRefreshLatestMessagesRecyclerView(p0: DataSnapshot) {
-        val chatMessage = p0.getValue(ChatMessage::class.java) ?: return
-        latestMessagesHashMap[p0.key!!] = chatMessage
+    private fun fillAndRefreshLatestMessagesRecyclerView(p0: DataSnapshot,isStatusChange: Boolean = false) {
+            if (!isStatusChange) {
+                val chatMessage = p0.getValue(ChatMessage::class.java) ?: return
+                latestMessagesHashMap[p0.key!!] = chatMessage
 
-        groupAdapter.clear()
-        latestMessagesHashMap.values.sortedByDescending { it.timestamp }.forEach { groupAdapter.add(LatestMessageItem(it)) }
+                groupAdapter.clear()
+                latestMessagesHashMap.values.sortedByDescending { it.timestamp }.forEach { groupAdapter.add(LatestMessageItem(it)) }
+            }
     }
 
     private fun fetchCurrentUser() {
@@ -111,6 +112,7 @@ class LatestMessagesActivity : AppCompatActivity() {
             }
 
         })
+        ref.child("status").setValue("online")
     }
 
     private fun verificationExistingUser() {
@@ -160,6 +162,12 @@ class LatestMessagesActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
+    override fun onStop() {
+        super.onStop()
+        val reference = FirebaseDatabase.getInstance().getReference("/users/${currentUser!!.id}")
+        reference.child("status").setValue("offline")
+    }
+
     inner class LatestMessageItem(private val chatMessage: ChatMessage) : Item<GroupieViewHolder>() {
         var interlocutorUser: User? = null
 
@@ -178,6 +186,17 @@ class LatestMessagesActivity : AppCompatActivity() {
                 override fun onDataChange(p0: DataSnapshot) {
                     interlocutorUser = p0.getValue(User::class.java)
                     viewHolder.itemView.text_view_user_name_latest_messages_activity.text = interlocutorUser?.userName
+                    ref.child("status").addListenerForSingleValueEvent(object: ValueEventListener{
+                        override fun onCancelled(p0: DatabaseError) {
+                            TODO("Not yet implemented")
+                        }
+
+                        override fun onDataChange(p0: DataSnapshot) {
+                            viewHolder.itemView.circle_image_view_latest_messages_activity_status_user.visibility =
+                                if (interlocutorUser!!.status == "online") View.VISIBLE else View.GONE
+                        }
+
+                    })
                     Glide
                         .with(this@LatestMessagesActivity)
                         .load(interlocutorUser?.imageUrl)

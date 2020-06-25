@@ -4,6 +4,7 @@ import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.MenuItem
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.bumptech.glide.Glide
@@ -90,6 +91,8 @@ class NewMessageActivity : AppCompatActivity() {
                 .with(this@NewMessageActivity)
                 .load(user.imageUrl)
                 .into(viewHolder.itemView.circle_image_view_select_user)
+            viewHolder.itemView.circle_image_view_new_message_activity_status_user.visibility =
+                if (user.status == "online") View.VISIBLE else View.GONE
         }
     }
 }

@@ -13,15 +13,19 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <activity android:name=".messages.EditProfileActivity" />
+
         <activity
             android:name=".messages.NewMessageActivity"
             android:launchMode="singleTop"
             android:parentActivityName=".messages.LatestMessagesActivity">
         </activity>
+
         <activity android:name=".messages.ChatLogActivity"
             android:parentActivityName=".messages.LatestMessagesActivity">
         </activity>
+
         <activity
             android:name=".messages.LatestMessagesActivity"
             android:launchMode="singleTop">
@@ -31,8 +35,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity android:name=".registration.MainActivity" />
+
         <activity android:name=".registration.LoginActivity" />
+
         <service android:name=".notification.MyFirebaseMessaging"
             android:enabled="true"
             android:exported="false"
