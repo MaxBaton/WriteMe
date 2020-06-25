@@ -186,17 +186,8 @@ class LatestMessagesActivity : AppCompatActivity() {
                 override fun onDataChange(p0: DataSnapshot) {
                     interlocutorUser = p0.getValue(User::class.java)
                     viewHolder.itemView.text_view_user_name_latest_messages_activity.text = interlocutorUser?.userName
-                    ref.child("status").addListenerForSingleValueEvent(object: ValueEventListener{
-                        override fun onCancelled(p0: DatabaseError) {
-                            TODO("Not yet implemented")
-                        }
-
-                        override fun onDataChange(p0: DataSnapshot) {
-                            viewHolder.itemView.circle_image_view_latest_messages_activity_status_user.visibility =
-                                if (interlocutorUser!!.status == "online") View.VISIBLE else View.GONE
-                        }
-
-                    })
+                    viewHolder.itemView.circle_image_view_latest_messages_activity_status_user.visibility =
+                        if (interlocutorUser!!.status == "online") View.VISIBLE else View.GONE
                     Glide
                         .with(this@LatestMessagesActivity)
                         .load(interlocutorUser?.imageUrl)
