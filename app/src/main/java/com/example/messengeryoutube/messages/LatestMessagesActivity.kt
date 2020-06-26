@@ -61,6 +61,28 @@ class LatestMessagesActivity : AppCompatActivity() {
         super.onStart()
         fetchCurrentUser()
         listenForLatestMessages()
+        val refStatus = FirebaseDatabase.getInstance().getReference("/users")
+        refStatus.addChildEventListener(object: ChildEventListener{
+            override fun onCancelled(p0: DatabaseError) {
+                TODO("Not yet implemented")
+            }
+
+            override fun onChildMoved(p0: DataSnapshot, p1: String?) {
+                TODO("Not yet implemented")
+            }
+
+            override fun onChildChanged(p0: DataSnapshot, p1: String?) {
+                fillAndRefreshLatestMessagesRecyclerView(null,isStatusChange = true)
+            }
+
+            override fun onChildAdded(p0: DataSnapshot, p1: String?) {
+                val a = 3
+            }
+
+            override fun onChildRemoved(p0: DataSnapshot) {
+                TODO("Not yet implemented")
+            }
+        })
     }
 
     private fun listenForLatestMessages() {
@@ -89,13 +111,15 @@ class LatestMessagesActivity : AppCompatActivity() {
         })
     }
 
-    private fun fillAndRefreshLatestMessagesRecyclerView(p0: DataSnapshot,isStatusChange: Boolean = false) {
+    private fun fillAndRefreshLatestMessagesRecyclerView(p0: DataSnapshot?,isStatusChange: Boolean = false) {
             if (!isStatusChange) {
-                val chatMessage = p0.getValue(ChatMessage::class.java) ?: return
+                val chatMessage = p0!!.getValue(ChatMessage::class.java) ?: return
                 latestMessagesHashMap[p0.key!!] = chatMessage
 
                 groupAdapter.clear()
                 latestMessagesHashMap.values.sortedByDescending { it.timestamp }.forEach { groupAdapter.add(LatestMessageItem(it)) }
+            }else {
+                latestMessagesHashMap.values.sortedByDescending { it.timestamp }.forEach { _ -> groupAdapter.notifyDataSetChanged() }
             }
     }
 

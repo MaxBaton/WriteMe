@@ -1,6 +1,6 @@
 package com.example.messengeryoutube.console
 
 fun main() {
-    val result = EqualizeTheArray().equalizeArray(arrayOf(1,2,2,3))
+    val result = NonDivisibleSubset().nonDivisibleSubset(3, arrayOf(1,7,2,4))
     println(result)
 }
