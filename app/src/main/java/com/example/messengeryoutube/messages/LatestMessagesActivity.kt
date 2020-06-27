@@ -36,8 +36,9 @@ class LatestMessagesActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         verificationExistingUser()
-       // verificationFromNotification() // исправить, не работает, если пользователь находиьтся в LatestMessagesActivity
         CustomActionBar.latestMessagesActivityActionBar(this,editMenu)
+        val serviceIntent = Intent(this,CloseAppService::class.java)
+        startService(serviceIntent)
 
         binding = ActivityLatestMessagesBinding.inflate(layoutInflater)
         with(binding) {
@@ -76,7 +77,7 @@ class LatestMessagesActivity : AppCompatActivity() {
             }
 
             override fun onChildAdded(p0: DataSnapshot, p1: String?) {
-                val a = 3
+                val a = 3 // without this is not working
             }
 
             override fun onChildRemoved(p0: DataSnapshot) {
@@ -184,12 +185,6 @@ class LatestMessagesActivity : AppCompatActivity() {
             }
         }
         return super.onOptionsItemSelected(item)
-    }
-
-    override fun onStop() {
-        super.onStop()
-        val reference = FirebaseDatabase.getInstance().getReference("/users/${currentUser!!.id}")
-        reference.child("status").setValue("offline")
     }
 
     inner class LatestMessageItem(private val chatMessage: ChatMessage) : Item<GroupieViewHolder>() {
