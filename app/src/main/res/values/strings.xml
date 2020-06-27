@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MessengerYoutube</string>
+    <string name="app_name">WriteMe</string>
     <string name="registration_button">Зарегистрироваться</string>
     <string name="hint_editText_password">Пароль</string>
     <string name="hint_editText_email">Email</string>
