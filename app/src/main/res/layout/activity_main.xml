@@ -15,31 +15,18 @@
         android:layout_marginTop="80dp"
         android:elevation="2dp"
         app:civ_border_width="4dp"
-        android:src="@drawable/abc_vector_test"
+        tools:src="@tools:sample/avatars"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-<!--    <Button-->
-<!--        android:id="@+id/btn_select_photo"-->
-<!--        style="@style/ButtonSelectPhoto"-->
-<!--        android:layout_marginBottom="1dp"-->
-<!--        android:gravity="center_horizontal"-->
-<!--        android:text="@string/select_photo"-->
-<!--        app:layout_constraintBottom_toTopOf="@+id/linear_layout_registration"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintHorizontal_bias="0.497"-->
-<!--        app:layout_constraintStart_toStartOf="parent" />-->
 
     <LinearLayout
         android:id="@+id/linear_layout_registration"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:layout_marginBottom="130dp"
         android:gravity="center"
         android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.496"
         app:layout_constraintStart_toStartOf="parent"

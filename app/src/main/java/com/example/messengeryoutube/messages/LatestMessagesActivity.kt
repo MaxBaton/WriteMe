@@ -14,6 +14,7 @@ import com.example.messengeryoutube.databinding.ActivityLatestMessagesBinding
 import com.example.messengeryoutube.notification.Token
 import com.example.messengeryoutube.registration.MainActivity
 import com.example.messengeryoutube.registration.User
+import com.example.messengeryoutube.toast
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.google.firebase.iid.FirebaseInstanceId
@@ -36,6 +37,11 @@ class LatestMessagesActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         verificationExistingUser()
+        if (verificationExistingUser() != null) {
+            finish()
+            startActivity(verificationExistingUser())
+            return
+        }
         CustomActionBar.latestMessagesActivityActionBar(this,editMenu)
         val serviceIntent = Intent(this,CloseAppService::class.java)
         startService(serviceIntent)
@@ -46,7 +52,8 @@ class LatestMessagesActivity : AppCompatActivity() {
 
             recyclerViewLatestMessages.adapter = groupAdapter
             recyclerViewLatestMessages.addItemDecoration(
-                DividerItemDecoration(this@LatestMessagesActivity,DividerItemDecoration.VERTICAL))
+                DividerItemDecoration(this@LatestMessagesActivity,DividerItemDecoration.VERTICAL)
+            )
         }
         groupAdapter.setOnItemClickListener { item, _ ->
             val interlocutorUser = item as LatestMessageItem
@@ -140,14 +147,15 @@ class LatestMessagesActivity : AppCompatActivity() {
         ref.child("status").setValue("online")
     }
 
-    private fun verificationExistingUser() {
+    private fun verificationExistingUser(): Intent? {
         val uid = FirebaseAuth.getInstance().uid
         if (uid == null){
             val intent = Intent(this@LatestMessagesActivity,MainActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK.or(Intent.FLAG_ACTIVITY_NEW_TASK)
-            startActivity(intent)
-            finish()
-        }
+            //startActivity(intent)
+//            finish()
+            return intent
+        }else return null
     }
 
 
@@ -157,6 +165,13 @@ class LatestMessagesActivity : AppCompatActivity() {
         val reference = FirebaseDatabase.getInstance().getReference("/tokens")
         val token = Token(refreshToken!!)
         reference.child(currentUser!!.uid).setValue(token)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        //val reference = FirebaseDatabase.getInstance().getReference("/users/${FirebaseAuth.getInstance().currentUser!!.uid}")
+        //reference.child("status").setValue("offline")
+        //        Thread.sleep(100) // service doesn't have time to work
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -173,10 +188,13 @@ class LatestMessagesActivity : AppCompatActivity() {
                 startActivity(intent)
             }
             R.id.menu_sign_out -> {
+                val reference = FirebaseDatabase.getInstance().getReference("/users/${FirebaseAuth.getInstance().currentUser!!.uid}")
+                reference.child("status").setValue("offline")
                 FirebaseAuth.getInstance().signOut()
                 val intent = Intent(this@LatestMessagesActivity,MainActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK.or(Intent.FLAG_ACTIVITY_NEW_TASK)
                 startActivity(intent)
+                finish()
             }
             R.id.menu_edit_profile -> {
                 val intent = Intent(this,EditProfileActivity::class.java)
