@@ -15,6 +15,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.Priority
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
+import com.example.messengeryoutube.CustomActionBar
 import com.example.messengeryoutube.R
 import com.example.messengeryoutube.databinding.ActivityMainBinding
 import com.example.messengeryoutube.messages.LatestMessagesActivity
@@ -36,16 +37,12 @@ class MainActivity : AppCompatActivity() {
     private var job: Job? = null
 
     private companion object{
-        const val MAN_AVATAR_URL = "https://cdn3.iconfinder.com/data/icons/incognito-avatars/154/man-body-hair-avatar-head-round-512.png"
-        const val WOMAN_AVATAR_URL = "https://cdn3.iconfinder.com/data/icons/incognito-avatars/154/woman-face-avatar-lady-512.png"
-//        const val ANONYMOUS_AVATAR_URL = "https://www.meme-arsenal.com/memes/825b9b3ef148fbf2b20f47951e170699.jpg"
-//        const val ANONYMOUS_AVATAR_URL2 = "https://cdn2.iconfinder.com/data/icons/social-flat-buttons-3/512/anonymous-512.png"
         const val ANONYMOUS_AVATAR_URL = "https://iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        tuneActionBar()
+        CustomActionBar.customActionBar(this,title = "Регистрация",isHomeButtonInlcude = false)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         with(binding) {
@@ -101,11 +98,6 @@ class MainActivity : AppCompatActivity() {
             setCancelable(true)
             dialog = create()
         }
-    }
-
-    private fun tuneActionBar() {
-        supportActionBar?.title = "Регистрация"
-        supportActionBar?.setBackgroundDrawable(ColorDrawable(window.statusBarColor))
     }
 
     private fun performRegister(email:String,password:String) {

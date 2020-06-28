@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
+import com.example.messengeryoutube.CustomActionBar
 import com.example.messengeryoutube.databinding.ActivityChatLogBinding
 import com.example.messengeryoutube.notification.*
 import com.example.messengeryoutube.registration.User
@@ -40,7 +41,7 @@ class ChatLogActivity : AppCompatActivity() {
         interlocutorUser = intent.getParcelableExtra(NewMessageActivity.INTERLOCUTOR_USER)
         currentUser = intent.getParcelableExtra(LatestMessagesActivity.CURRENT_USER_KEY)
         apiService = Client.getClient("https://fcm.googleapis.com/")!!.create(APIService::class.java)
-        tuneActionBar(interlocutorUser!!.userName)
+        CustomActionBar.customActionBar(this,title = interlocutorUser!!.userName,isHomeButtonInlcude = true)
 
         binding = ActivityChatLogBinding.inflate(layoutInflater)
         with(binding) {

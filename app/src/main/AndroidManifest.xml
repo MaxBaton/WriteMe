@@ -18,7 +18,6 @@
 
         <activity
             android:name=".messages.NewMessageActivity"
-            android:launchMode="singleTop"
             android:parentActivityName=".messages.LatestMessagesActivity">
         </activity>
 

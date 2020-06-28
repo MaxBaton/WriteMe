@@ -8,6 +8,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.bumptech.glide.Glide
+import com.example.messengeryoutube.CustomActionBar
 import com.example.messengeryoutube.R
 import com.example.messengeryoutube.databinding.ActivityNewMessageBinding
 import com.example.messengeryoutube.registration.User
@@ -30,7 +31,7 @@ class NewMessageActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        tuneActionBar()
+        CustomActionBar.customActionBar(this,title = "Выбор пользователя",isHomeButtonInlcude = true)
 
         currentUser = intent.getParcelableExtra(LatestMessagesActivity.CURRENT_USER_KEY)
         binding = ActivityNewMessageBinding.inflate(layoutInflater)
@@ -110,11 +111,6 @@ class NewMessageActivity : AppCompatActivity() {
                     DividerItemDecoration(this@NewMessageActivity, DividerItemDecoration.VERTICAL))
             }
         })
-    }
-
-    private fun tuneActionBar() {
-        supportActionBar?.title = "Выбор пользователя"
-        supportActionBar?.setBackgroundDrawable(ColorDrawable(window.statusBarColor))
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

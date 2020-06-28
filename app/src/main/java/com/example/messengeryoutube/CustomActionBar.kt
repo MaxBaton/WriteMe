@@ -8,15 +8,10 @@ import androidx.appcompat.app.AppCompatActivity
 
 class CustomActionBar {
     companion object{
-        fun editProfileActionBar(activity: AppCompatActivity){
-            activity.supportActionBar?.title = "Профиль"
+        fun customActionBar(activity: AppCompatActivity,title: String,isHomeButtonInlcude: Boolean){
+            activity.supportActionBar?.title = title
             activity.supportActionBar?.setBackgroundDrawable(ColorDrawable(activity.window.statusBarColor))
-            activity.supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        }
-
-        fun latestMessagesActivityActionBar(activity: AppCompatActivity, menu: Menu?) {
-            activity.supportActionBar?.title = "Диалоги"
-            activity.supportActionBar?.setBackgroundDrawable(ColorDrawable(activity.window.statusBarColor))
+            activity.supportActionBar?.setDisplayHomeAsUpEnabled(isHomeButtonInlcude)
         }
     }
 }

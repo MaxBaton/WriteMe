@@ -36,7 +36,7 @@ class EditProfileActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityEditProfileBinding.inflate(layoutInflater)
-        CustomActionBar.editProfileActionBar(this)
+        CustomActionBar.customActionBar(this,title = "Профиль",isHomeButtonInlcude = true)
         currentUser = intent.getParcelableExtra(LatestMessagesActivity.CURRENT_USER_KEY)!!
         fillWithData()
         with(binding) {

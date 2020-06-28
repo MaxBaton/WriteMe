@@ -42,7 +42,7 @@ class LatestMessagesActivity : AppCompatActivity() {
             startActivity(verificationExistingUser())
             return
         }
-        CustomActionBar.latestMessagesActivityActionBar(this,editMenu)
+        CustomActionBar.customActionBar(this,title = "Диалоги",isHomeButtonInlcude = false)
         val serviceIntent = Intent(this,CloseAppService::class.java)
         startService(serviceIntent)
 
@@ -152,8 +152,6 @@ class LatestMessagesActivity : AppCompatActivity() {
         if (uid == null){
             val intent = Intent(this@LatestMessagesActivity,MainActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK.or(Intent.FLAG_ACTIVITY_NEW_TASK)
-            //startActivity(intent)
-//            finish()
             return intent
         }else return null
     }
@@ -165,13 +163,6 @@ class LatestMessagesActivity : AppCompatActivity() {
         val reference = FirebaseDatabase.getInstance().getReference("/tokens")
         val token = Token(refreshToken!!)
         reference.child(currentUser!!.uid).setValue(token)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        //val reference = FirebaseDatabase.getInstance().getReference("/users/${FirebaseAuth.getInstance().currentUser!!.uid}")
-        //reference.child("status").setValue("offline")
-        //        Thread.sleep(100) // service doesn't have time to work
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

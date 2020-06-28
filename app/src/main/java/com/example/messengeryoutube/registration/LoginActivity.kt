@@ -6,6 +6,7 @@ import android.graphics.drawable.ColorDrawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
+import com.example.messengeryoutube.CustomActionBar
 import com.example.messengeryoutube.R
 import com.example.messengeryoutube.databinding.ActivityLoginBinding
 import com.example.messengeryoutube.messages.LatestMessagesActivity
@@ -19,7 +20,7 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        tuneActionBar()
+        CustomActionBar.customActionBar(this,title = "Вход",isHomeButtonInlcude = true)
 
         binding = ActivityLoginBinding.inflate(layoutInflater)
         with(binding) {
@@ -56,19 +57,12 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    private fun tuneActionBar() {
-        supportActionBar?.title = "Вход"
-        supportActionBar?.setBackgroundDrawable(ColorDrawable(window.statusBarColor))
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-    }
-
     private fun performLogIn(email: String, password: String) {
         FirebaseAuth.getInstance().signInWithEmailAndPassword(email,password)
             .addOnCompleteListener {
                 if (!it.isSuccessful) return@addOnCompleteListener
 
                 dialog?.dismiss()
-                toast("Успешный вход")
                 val intent = Intent(this@LoginActivity, LatestMessagesActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK.or(Intent.FLAG_ACTIVITY_NEW_TASK)
                 startActivity(intent)
