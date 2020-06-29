@@ -14,9 +14,9 @@
         android:layout_marginTop="12dp"
         android:layout_marginBottom="12dp"
         app:civ_border_width="2dp"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         tools:src="@tools:sample/avatars" />
 
     <de.hdodenhof.circleimageview.CircleImageView

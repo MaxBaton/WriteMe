@@ -42,7 +42,6 @@ class ChatLogActivity : AppCompatActivity() {
         currentUser = intent.getParcelableExtra(LatestMessagesActivity.CURRENT_USER_KEY)
         apiService = Client.getClient("https://fcm.googleapis.com/")!!.create(APIService::class.java)
         CustomActionBar.customActionBar(this,title = interlocutorUser!!.userName,isHomeButtonInlcude = true)
-
         binding = ActivityChatLogBinding.inflate(layoutInflater)
         with(binding) {
             setContentView(root)
