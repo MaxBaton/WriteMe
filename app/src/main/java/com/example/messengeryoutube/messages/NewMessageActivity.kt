@@ -74,45 +74,37 @@ class NewMessageActivity : AppCompatActivity() {
 
     private fun fetchUser(isStatusChange: Boolean = false, userFromChangeStatus: User? = null) {
         val ref = FirebaseDatabase.getInstance().getReference("/users")
-        ref.addListenerForSingleValueEvent(object: ValueEventListener{
-            override fun onCancelled(p0: DatabaseError) {}
+        if (!isStatusChange) {
+            ref.addListenerForSingleValueEvent(object: ValueEventListener{
+                override fun onCancelled(p0: DatabaseError) {}
 
-            override fun onDataChange(p0: DataSnapshot) {
-                val id = FirebaseAuth.getInstance().uid
+                override fun onDataChange(p0: DataSnapshot) {
+                    val id = FirebaseAuth.getInstance().uid
 
-                p0.children.forEach {
-                    val user = it.getValue(User::class.java)
-                    if (user?.id != id) {
-                        if (!isStatusChange) {
+                    p0.children.forEach {
+                        val user = it.getValue(User::class.java)
+                        if (user?.id != id) {
                             groupAdapter.add(UserItem(user!!))
                             listOfUsers.add(user)
-                        } else {
-                            var position = 0
-                            listOfUsers.forEachIndexed { index, _user ->
-                                if (_user.id == userFromChangeStatus!!.id) {
-                                    position = index
-                                    return@forEachIndexed
-                                }
-                            }
-                            groupAdapter.notifyItemChanged(position)
-//                            groupAdapter.notifyDataSetChanged()
                         }
                     }
-                }
-                groupAdapter.setOnItemClickListener { item, _ ->
-                    val userItem = item as UserItem
-                    val intent = Intent(this@NewMessageActivity,ChatLogActivity::class.java)
-                    intent.putExtra(INTERLOCUTOR_USER,userItem.user)
-                    intent.putExtra(LatestMessagesActivity.CURRENT_USER_KEY,currentUser)
-                    startActivity(intent)
-                    finish()
-                }
+                    groupAdapter.setOnItemClickListener { item, _ ->
+                        val userItem = item as UserItem
+                        val intent = Intent(this@NewMessageActivity,ChatLogActivity::class.java)
+                        intent.putExtra(INTERLOCUTOR_USER,userItem.user)
+                        intent.putExtra(LatestMessagesActivity.CURRENT_USER_KEY,currentUser)
+                        startActivity(intent)
+                        finish()
+                    }
 
-                binding.recyclerViewSelectUser.adapter = groupAdapter
-                binding.recyclerViewSelectUser.addItemDecoration(
-                    DividerItemDecoration(this@NewMessageActivity, DividerItemDecoration.VERTICAL))
-            }
-        })
+                    binding.recyclerViewSelectUser.adapter = groupAdapter
+                    binding.recyclerViewSelectUser.addItemDecoration(
+                        DividerItemDecoration(this@NewMessageActivity, DividerItemDecoration.VERTICAL))
+                }
+            })
+        }else {
+            listOfUsers.forEach { _ -> groupAdapter.notifyDataSetChanged() }
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
