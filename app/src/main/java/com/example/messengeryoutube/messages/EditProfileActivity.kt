@@ -8,8 +8,6 @@ import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.provider.MediaStore
 import android.util.Log
 import android.view.Menu
@@ -25,13 +23,10 @@ import com.example.messengeryoutube.registration.MainActivity
 import com.example.messengeryoutube.registration.User
 import com.example.messengeryoutube.toast
 import com.example.messengeryoutube.toastLong
-import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.google.firebase.storage.FirebaseStorage
-import kotlinx.coroutines.*
-import java.lang.Runnable
 
 class EditProfileActivity : AppCompatActivity() {
     private lateinit var binding: ActivityEditProfileBinding
@@ -39,6 +34,7 @@ class EditProfileActivity : AppCompatActivity() {
     private var currentUserAuth = FirebaseAuth.getInstance().currentUser
     private var dialog: AlertDialog? = null
     private var selectPhoto: Uri? = null
+    private var isClickDeleteAccount: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,12 +49,19 @@ class EditProfileActivity : AppCompatActivity() {
                 val password = editTextPasswordEditProfile.text.toString()
                 val userName = editTextUsernameEditProfile.text.toString()
                 dialog = createUpdateOrDeleteAlertDialog("Обновление данных")
-                updateData(userName,email,password)
+                updateData(userName,email,password,isClickDeleteAccount)
             }
             circleImageViewAvatarEditProfileFragment.setOnClickListener {
                 val intent = Intent(Intent.ACTION_PICK)
                 intent.type = "image/*"
                 startActivityForResult(intent, 0)
+            }
+            imageViewDeleteAvatar.setOnClickListener {
+                Glide
+                    .with(this@EditProfileActivity)
+                    .load(MainActivity.ANONYMOUS_AVATAR_URL)
+                    .into(circleImageViewAvatarEditProfileFragment)
+                isClickDeleteAccount = true
             }
         }
     }
@@ -72,7 +75,12 @@ class EditProfileActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateData(userName: String, email: String, password: String) {
+    private fun updateData(
+        userName: String,
+        email: String,
+        password: String,
+        isClickDeleteAccount: Boolean
+    ) {
         runOnUiThread { dialog?.show() }
         val uid = FirebaseAuth.getInstance().uid
         val reference = FirebaseDatabase.getInstance().getReference("/users/$uid")
@@ -88,13 +96,8 @@ class EditProfileActivity : AppCompatActivity() {
                         }
                     }
                 }
-        }
-        var changeEmailOrAndPassword =  0
-        if (email != currentUserAuth?.email) changeEmailOrAndPassword++
-        if(password.isNotEmpty()) changeEmailOrAndPassword+=2
-        if (changeEmailOrAndPassword > 0) {
-            val dialog = createAlertDialogConfirmEdit(email,password,changeEmailOrAndPassword)
-            dialog?.show()
+        }else if (isClickDeleteAccount) {
+            reference.child("imageUrl").setValue(MainActivity.ANONYMOUS_AVATAR_URL)
         }
         if (userName != currentUser.userName){
             reference.child("userName").setValue(userName)
@@ -108,6 +111,16 @@ class EditProfileActivity : AppCompatActivity() {
                     }
                 }
                 .addOnFailureListener { toastLong(it.message.toString()) }
+        }
+        var changeEmailOrAndPassword =  0
+        if (email != currentUserAuth?.email) changeEmailOrAndPassword++
+        if(password.isNotEmpty()) changeEmailOrAndPassword+=2
+        if (changeEmailOrAndPassword > 0) {
+            val dialog = createAlertDialogConfirmEdit(email,password,changeEmailOrAndPassword)
+            dialog?.show()
+        } else if (selectPhoto == null){
+            dialog?.dismiss()
+            finish()
         }
     }
 
