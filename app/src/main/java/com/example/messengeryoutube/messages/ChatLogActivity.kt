@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.util.Log
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
@@ -68,15 +69,15 @@ class ChatLogActivity : AppCompatActivity() {
         notificationManager.cancel(NotificationMessage.NOTIFICATION_ID)
         setUserInChatFlag(true)
 
-        val referenceInterlocutorInChat = FirebaseDatabase.getInstance().getReference("/user_in_chat")
+        val referenceInterlocutorInChat = FirebaseDatabase.getInstance().getReference("/user_in_chat").child(interlocutorUser!!.id)
         referenceInterlocutorInChat.addValueEventListener(object: ValueEventListener{
             override fun onCancelled(p0: DatabaseError) {
-                TODO("Not yet implemented")
+                Log.d("ChatLogActivity","user in chat canceled")
             }
 
             override fun onDataChange(p0: DataSnapshot) {
                 for (p in p0.children) {
-                    if (p.key == interlocutorUser!!.id) {
+                    if (p.key == currentUser!!.id) {
                         isInterlocutorInChat = p.getValue(Boolean::class.java)!!
                     }
                 }
@@ -86,7 +87,7 @@ class ChatLogActivity : AppCompatActivity() {
 
     private fun setUserInChatFlag(isUserInChat: Boolean) {
         val refUserInChat = FirebaseDatabase.getInstance().getReference("/user_in_chat")
-        refUserInChat.child(currentUser!!.id).setValue(isUserInChat)
+        refUserInChat.child(currentUser!!.id).child(interlocutorUser!!.id).setValue(isUserInChat)
     }
 
     private fun listenForMessages() {
@@ -106,7 +107,7 @@ class ChatLogActivity : AppCompatActivity() {
             }
 
             override fun onCancelled(p0: DatabaseError) {
-                TODO("Not yet implemented")
+                Log.d("ChatLogActivity","users canceled")
             }
 
             override fun onChildMoved(p0: DataSnapshot, p1: String?) {
@@ -147,7 +148,7 @@ class ChatLogActivity : AppCompatActivity() {
         val reference = FirebaseDatabase.getInstance().getReference("/users").child(FirebaseAuth.getInstance().currentUser!!.uid)
         reference.addValueEventListener(object: ValueEventListener{
             override fun onCancelled(p0: DatabaseError) {
-                TODO("Not yet implemented")
+                Log.d("ChatLogActivity","users canceled")
             }
 
             override fun onDataChange(p0: DataSnapshot) {
@@ -200,7 +201,9 @@ class ChatLogActivity : AppCompatActivity() {
                 }
             }
 
-            override fun onCancelled(databaseError: DatabaseError) {}
+            override fun onCancelled(databaseError: DatabaseError) {
+                Log.d("ChatLogActivity","users canceled")
+            }
         })
     }
 

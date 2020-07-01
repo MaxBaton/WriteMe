@@ -8,7 +8,11 @@ import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.MediaStore
+import android.util.Log
+import android.view.Menu
 import android.view.MenuItem
 import android.widget.EditText
 import android.widget.TextView
@@ -17,14 +21,17 @@ import com.bumptech.glide.Glide
 import com.example.messengeryoutube.CustomActionBar
 import com.example.messengeryoutube.R
 import com.example.messengeryoutube.databinding.ActivityEditProfileBinding
+import com.example.messengeryoutube.registration.MainActivity
 import com.example.messengeryoutube.registration.User
 import com.example.messengeryoutube.toast
 import com.example.messengeryoutube.toastLong
+import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.*
 import com.google.firebase.storage.FirebaseStorage
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
+import java.lang.Runnable
 
 class EditProfileActivity : AppCompatActivity() {
     private lateinit var binding: ActivityEditProfileBinding
@@ -45,7 +52,7 @@ class EditProfileActivity : AppCompatActivity() {
                 val email = editTextEmailEditProfile.text.toString()
                 val password = editTextPasswordEditProfile.text.toString()
                 val userName = editTextUsernameEditProfile.text.toString()
-                createAlertDialog()
+                dialog = createUpdateOrDeleteAlertDialog("Обновление данных")
                 updateData(userName,email,password)
             }
             circleImageViewAvatarEditProfileFragment.setOnClickListener {
@@ -56,12 +63,12 @@ class EditProfileActivity : AppCompatActivity() {
         }
     }
 
-    private fun createAlertDialog() {
-        with(AlertDialog.Builder(this)) {
-            setTitle("Обновление данных")
+    private fun createUpdateOrDeleteAlertDialog(title: String): AlertDialog? {
+        return with(AlertDialog.Builder(this)) {
+            setTitle(title)
             setView(layoutInflater.inflate(R.layout.registration_wait_alert_dialog,null))
             setCancelable(true)
-            dialog = create()
+            create()
         }
     }
 
@@ -86,7 +93,7 @@ class EditProfileActivity : AppCompatActivity() {
         if (email != currentUserAuth?.email) changeEmailOrAndPassword++
         if(password.isNotEmpty()) changeEmailOrAndPassword+=2
         if (changeEmailOrAndPassword > 0) {
-            val dialog = createAlertDialogConfirm(email,password,changeEmailOrAndPassword)
+            val dialog = createAlertDialogConfirmEdit(email,password,changeEmailOrAndPassword)
             dialog?.show()
         }
         if (userName != currentUser.userName){
@@ -104,7 +111,7 @@ class EditProfileActivity : AppCompatActivity() {
         }
     }
 
-    private fun createAlertDialogConfirm(
+    private fun createAlertDialogConfirmEdit(
         email: String,
         password: String,
         changeEmailOrAndPassword: Int
@@ -114,7 +121,7 @@ class EditProfileActivity : AppCompatActivity() {
             val view = layoutInflater.inflate(R.layout.confirm_edit_email_password_alert_dialog,null)
             setView(view)
             setCancelable(false)
-            setPositiveButton("Подтвердить") { currentDialog, which ->
+            setPositiveButton("Подтвердить") { currentDialog, _ ->
                                        currentUserAuth?.let {
                                            val currentEmail = currentUserAuth!!.email!!
                                            val editTextPassword = view.findViewById<EditText>(R.id.edit_text_confirm_password)
@@ -174,6 +181,24 @@ class EditProfileActivity : AppCompatActivity() {
          }
     }
 
+    private fun createAlertDialogConfirmDelete(): AlertDialog? {
+        return with(AlertDialog.Builder(this)) {
+            setTitle("Подтверждение удаления")
+            val positiveButton = setPositiveButton("Подтвердить") { currentDialog, _ ->
+                currentDialog.cancel()
+                deleteAccount()
+                //doesn't work
+//                    GlobalScope.launch(Dispatchers.Main) {
+//                        withContext(Dispatchers.IO) {deleteAccount()}
+//                    }
+            }
+            setNegativeButton("Отмена") {currentDialog, _ ->
+                currentDialog.cancel()
+            }
+            create()
+        }
+    }
+
     private fun fillWithData() {
         val imageUrl = if (currentUser.imageUrl != "") currentUser.imageUrl else R.drawable.edit_anonymous
         Glide
@@ -182,6 +207,70 @@ class EditProfileActivity : AppCompatActivity() {
             .into(binding.circleImageViewAvatarEditProfileFragment)
         binding.editTextUsernameEditProfile.setText(currentUser.userName, TextView.BufferType.EDITABLE)
         binding.editTextEmailEditProfile.setText(currentUserAuth?.email, TextView.BufferType.EDITABLE)
+    }
+
+    private fun deleteAccount() {
+        val deleteDialog = createUpdateOrDeleteAlertDialog("Удаление аккаунта")
+        deleteDialog!!.show()
+        val allCurrentUserReferences = mutableListOf<DatabaseReference>()
+        val refUser = FirebaseDatabase.getInstance().getReference("/users").child(currentUser.id)
+        val refTokens = FirebaseDatabase.getInstance().getReference("/tokens").child(currentUser.id)
+        val refUserInChat = FirebaseDatabase.getInstance().getReference("/user_in_chat").child(currentUser.id)
+        val refUserMessages = FirebaseDatabase.getInstance().getReference("/users_messages").child(currentUser.id)
+        val refCurrentUserLatestMessages = FirebaseDatabase.getInstance().getReference("/latest_messages").child(currentUser.id)
+        val listOfInterlocutors = mutableListOf<String>()
+        readData(refCurrentUserLatestMessages,object: OnGetDataListener{
+            override fun onSuccess(dataSnapshot: DataSnapshot) {
+                dataSnapshot.children.forEach { listOfInterlocutors.add(it.key!!) }
+                Log.d("onGetDataListener","Success!!! Data is retrieved")
+                listOfInterlocutors.forEach {
+                    val ref = FirebaseDatabase.getInstance().getReference("/latest_messages").child(it).child(currentUser.id)
+                    allCurrentUserReferences.add(ref)
+                }
+                allCurrentUserReferences.add(refUser)
+                allCurrentUserReferences.add(refTokens)
+                allCurrentUserReferences.add(refUserInChat)
+                allCurrentUserReferences.add(refUserMessages)
+                allCurrentUserReferences.add(refCurrentUserLatestMessages)
+
+                allCurrentUserReferences.forEach {
+                    it.removeValue()
+                }
+
+                if (currentUser.imageUrl != MainActivity.ANONYMOUS_AVATAR_URL) {
+                    FirebaseStorage.getInstance().getReference("/avatars/${FirebaseAuth.getInstance().currentUser!!.email}").delete()
+                }
+                FirebaseAuth.getInstance().currentUser!!.delete()
+                //FirebaseAuth.getInstance().signOut()
+                val intent = Intent(this@EditProfileActivity, MainActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK.or(Intent.FLAG_ACTIVITY_NEW_TASK)
+                startActivity(intent)
+                finish()
+            }
+
+            override fun onStart() {
+                Log.d("onGetDataListener","onStart is running")
+            }
+
+            override fun onFailure() {
+                Log.d("onGetDataListener","onFailure is running")
+            }
+
+        })
+    }
+
+    private fun readData(reference: DatabaseReference,listener: OnGetDataListener) {
+        listener.onStart()
+        reference.addListenerForSingleValueEvent(object: ValueEventListener{
+            override fun onCancelled(error: DatabaseError) {
+                listener.onFailure()
+            }
+
+            override fun onDataChange(snapshot: DataSnapshot) {
+                listener.onSuccess(snapshot)
+            }
+
+        })
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -200,8 +289,16 @@ class EditProfileActivity : AppCompatActivity() {
         }
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_edit_profile,menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == android.R.id.home) finish()
+        when(item.itemId) {
+            android.R.id.home -> finish()
+            R.id.menu_delete_account ->  createAlertDialogConfirmDelete()!!.show() //so far very bad
+        }
         return super.onOptionsItemSelected(item)
     }
 }

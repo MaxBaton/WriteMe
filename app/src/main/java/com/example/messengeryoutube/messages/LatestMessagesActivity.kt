@@ -2,6 +2,7 @@ package com.example.messengeryoutube.messages
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -14,7 +15,6 @@ import com.example.messengeryoutube.databinding.ActivityLatestMessagesBinding
 import com.example.messengeryoutube.notification.Token
 import com.example.messengeryoutube.registration.MainActivity
 import com.example.messengeryoutube.registration.User
-import com.example.messengeryoutube.toast
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.google.firebase.iid.FirebaseInstanceId
@@ -28,7 +28,6 @@ class LatestMessagesActivity : AppCompatActivity() {
     private val groupAdapter = GroupAdapter<GroupieViewHolder>()
     private val latestMessagesHashMap = HashMap<String,ChatMessage>()
     private var currentUser: User? = null
-    private var editMenu: Menu? = null
 
     companion object{
         val CURRENT_USER_KEY = "current user"
@@ -72,7 +71,7 @@ class LatestMessagesActivity : AppCompatActivity() {
         val refStatus = FirebaseDatabase.getInstance().getReference("/users")
         refStatus.addChildEventListener(object: ChildEventListener{
             override fun onCancelled(p0: DatabaseError) {
-                TODO("Not yet implemented")
+                Log.d("LatesMessagesActivity","users canceled")
             }
 
             override fun onChildMoved(p0: DataSnapshot, p1: String?) {
@@ -80,7 +79,7 @@ class LatestMessagesActivity : AppCompatActivity() {
             }
 
             override fun onChildChanged(p0: DataSnapshot, p1: String?) {
-                fillAndRefreshLatestMessagesRecyclerView(null,isStatusChange = true)
+                fillAndRefreshLatestMessagesRecyclerView(null,isUserDataChange = true)
             }
 
             override fun onChildAdded(p0: DataSnapshot, p1: String?) {
@@ -88,7 +87,7 @@ class LatestMessagesActivity : AppCompatActivity() {
             }
 
             override fun onChildRemoved(p0: DataSnapshot) {
-                TODO("Not yet implemented")
+                fillAndRefreshLatestMessagesRecyclerView(null,isUserDataChange = true)
             }
         })
     }
@@ -102,7 +101,7 @@ class LatestMessagesActivity : AppCompatActivity() {
             }
 
             override fun onCancelled(p0: DatabaseError) {
-                TODO("Not yet implemented")
+                Log.d("LatesMessagesActivity","users canceled")
             }
 
             override fun onChildMoved(p0: DataSnapshot, p1: String?) {
@@ -119,8 +118,8 @@ class LatestMessagesActivity : AppCompatActivity() {
         })
     }
 
-    private fun fillAndRefreshLatestMessagesRecyclerView(p0: DataSnapshot?,isStatusChange: Boolean = false) {
-            if (!isStatusChange) {
+    private fun fillAndRefreshLatestMessagesRecyclerView(p0: DataSnapshot?, isUserDataChange: Boolean = false) {
+            if (!isUserDataChange) {
                 val chatMessage = p0!!.getValue(ChatMessage::class.java) ?: return
                 latestMessagesHashMap[p0.key!!] = chatMessage
 
@@ -136,7 +135,7 @@ class LatestMessagesActivity : AppCompatActivity() {
         val ref = FirebaseDatabase.getInstance().getReference("/users/$uid")
         ref.addListenerForSingleValueEvent(object: ValueEventListener{
             override fun onCancelled(p0: DatabaseError) {
-                TODO("Not yet implemented")
+                Log.d("LatesMessagesActivity","users canceled")
             }
 
             override fun onDataChange(p0: DataSnapshot) {
@@ -166,7 +165,6 @@ class LatestMessagesActivity : AppCompatActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        editMenu = menu
         menuInflater.inflate(R.menu.menu_latest_messages,menu)
         return super.onCreateOptionsMenu(menu)
     }
@@ -208,7 +206,7 @@ class LatestMessagesActivity : AppCompatActivity() {
             val ref = FirebaseDatabase.getInstance().getReference("/users/$currentId")
             ref.addListenerForSingleValueEvent(object: ValueEventListener{
                 override fun onCancelled(p0: DatabaseError) {
-                    TODO("Not yet implemented")
+                    Log.d("LatesMessagesActivity","users canceled")
                 }
 
                 override fun onDataChange(p0: DataSnapshot) {

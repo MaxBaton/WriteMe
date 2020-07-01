@@ -12,7 +12,12 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+<!--    Menu items in LatestMessagesActivity.kt-->
     <string name="input_message_in_chat">Введите сообщение</string>
     <string name="send_message_in_chat">Отправить</string>
     <string name="edit_profile">Редактировать профиль</string>
+
+<!--    Delete account in EditProfileActivity.kt -->
+    <string name="menu_delete_user">Удалить аккаунт</string>
 </resources>

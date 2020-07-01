@@ -3,6 +3,7 @@ package com.example.messengeryoutube.messages
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -48,7 +49,7 @@ class NewMessageActivity : AppCompatActivity() {
         val refStatus = FirebaseDatabase.getInstance().getReference("/users")
         refStatus.addChildEventListener(object: ChildEventListener {
             override fun onCancelled(p0: DatabaseError) {
-                TODO("Not yet implemented")
+                Log.d("NewMessageActivity","users canceled")
             }
 
             override fun onChildMoved(p0: DataSnapshot, p1: String?) {
@@ -76,7 +77,9 @@ class NewMessageActivity : AppCompatActivity() {
         val ref = FirebaseDatabase.getInstance().getReference("/users")
         if (!isStatusChange) {
             ref.addListenerForSingleValueEvent(object: ValueEventListener{
-                override fun onCancelled(p0: DatabaseError) {}
+                override fun onCancelled(p0: DatabaseError) {
+                    Log.d("NewMessageActivity","users canceled")
+                }
 
                 override fun onDataChange(p0: DataSnapshot) {
                     val id = FirebaseAuth.getInstance().uid
@@ -124,7 +127,7 @@ class NewMessageActivity : AppCompatActivity() {
             val ref = FirebaseDatabase.getInstance().getReference("/users/${user.id}")
             ref.addListenerForSingleValueEvent(object: ValueEventListener{
                 override fun onCancelled(p0: DatabaseError) {
-                    TODO("Not yet implemented")
+                    Log.d("NewMessageActivity","users canceled")
                 }
 
                 override fun onDataChange(p0: DataSnapshot) {

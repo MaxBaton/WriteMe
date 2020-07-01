@@ -36,7 +36,7 @@ class MainActivity : AppCompatActivity() {
     private var dialog: AlertDialog? = null
     private var job: Job? = null
 
-    private companion object{
+    companion object{
         const val ANONYMOUS_AVATAR_URL = "https://iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png"
     }
 
