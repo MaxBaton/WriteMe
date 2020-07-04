@@ -199,11 +199,9 @@ class EditProfileActivity : AppCompatActivity() {
             setTitle("Подтверждение удаления")
             val positiveButton = setPositiveButton("Подтвердить") { currentDialog, _ ->
                 currentDialog.cancel()
-                deleteAccount()
-                //doesn't work
-//                    GlobalScope.launch(Dispatchers.Main) {
-//                        withContext(Dispatchers.IO) {deleteAccount()}
-//                    }
+
+                //deleteAccount() //defer execution for now!!!
+
             }
             setNegativeButton("Отмена") {currentDialog, _ ->
                 currentDialog.cancel()
@@ -222,55 +220,68 @@ class EditProfileActivity : AppCompatActivity() {
         binding.editTextEmailEditProfile.setText(currentUserAuth?.email, TextView.BufferType.EDITABLE)
     }
 
-    private fun deleteAccount() {
-        val deleteDialog = createUpdateOrDeleteAlertDialog("Удаление аккаунта")
-        deleteDialog!!.show()
-        val allCurrentUserReferences = mutableListOf<DatabaseReference>()
-        val refUser = FirebaseDatabase.getInstance().getReference("/users").child(currentUser.id)
-        val refTokens = FirebaseDatabase.getInstance().getReference("/tokens").child(currentUser.id)
-        val refUserInChat = FirebaseDatabase.getInstance().getReference("/user_in_chat").child(currentUser.id)
-        val refUserMessages = FirebaseDatabase.getInstance().getReference("/users_messages").child(currentUser.id)
-        val refCurrentUserLatestMessages = FirebaseDatabase.getInstance().getReference("/latest_messages").child(currentUser.id)
-        val listOfInterlocutors = mutableListOf<String>()
-        readData(refCurrentUserLatestMessages,object: OnGetDataListener{
-            override fun onSuccess(dataSnapshot: DataSnapshot) {
-                dataSnapshot.children.forEach { listOfInterlocutors.add(it.key!!) }
-                Log.d("onGetDataListener","Success!!! Data is retrieved")
-                listOfInterlocutors.forEach {
-                    val ref = FirebaseDatabase.getInstance().getReference("/latest_messages").child(it).child(currentUser.id)
-                    allCurrentUserReferences.add(ref)
-                }
-                allCurrentUserReferences.add(refUser)
-                allCurrentUserReferences.add(refTokens)
-                allCurrentUserReferences.add(refUserInChat)
-                allCurrentUserReferences.add(refUserMessages)
-                allCurrentUserReferences.add(refCurrentUserLatestMessages)
-
-                allCurrentUserReferences.forEach {
-                    it.removeValue()
-                }
-
-                if (currentUser.imageUrl != MainActivity.ANONYMOUS_AVATAR_URL) {
-                    FirebaseStorage.getInstance().getReference("/avatars/${FirebaseAuth.getInstance().currentUser!!.email}").delete()
-                }
-                FirebaseAuth.getInstance().currentUser!!.delete()
-                //FirebaseAuth.getInstance().signOut()
-                val intent = Intent(this@EditProfileActivity, MainActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK.or(Intent.FLAG_ACTIVITY_NEW_TASK)
-                startActivity(intent)
-                finish()
-            }
-
-            override fun onStart() {
-                Log.d("onGetDataListener","onStart is running")
-            }
-
-            override fun onFailure() {
-                Log.d("onGetDataListener","onFailure is running")
-            }
-
-        })
-    }
+//    private fun deleteAccount() {
+//        val deleteDialog = createUpdateOrDeleteAlertDialog("Удаление аккаунта")
+//        deleteDialog!!.show()
+//        val allCurrentUserReferences = mutableListOf<DatabaseReference>()
+//        val refUser = FirebaseDatabase.getInstance().getReference("/users").child(currentUser.id)
+//        val refTokens = FirebaseDatabase.getInstance().getReference("/tokens").child(currentUser.id)
+//        val refUserInChat = FirebaseDatabase.getInstance().getReference("/user_in_chat").child(currentUser.id)
+//        val refUserMessages = FirebaseDatabase.getInstance().getReference("/users_messages").child(currentUser.id)
+//        val refCurrentUserLatestMessages = FirebaseDatabase.getInstance().getReference("/latest_messages").child(currentUser.id)
+//
+//        val listOfInterlocutors = mutableListOf<String>()
+//        val listOfUserInChatWithCurrentUser = mutableListOf<String>()
+//
+//        refUserInChat.addListenerForSingleValueEvent(object: ValueEventListener{
+//            override fun onCancelled(error: DatabaseError) {
+//                TODO("Not yet implemented")
+//            }
+//
+//            override fun onDataChange(snapshot: DataSnapshot) {
+//                listOfUserInChatWithCurrentUser.add(snapshot.key!!)
+//            }
+//        })
+//
+//        readData(refCurrentUserLatestMessages,object: OnGetDataListener{
+//            override fun onSuccess(dataSnapshot: DataSnapshot) {
+//                dataSnapshot.children.forEach { listOfInterlocutors.add(it.key!!) }
+//                Log.d("onGetDataListener","Success!!! Data is retrieved")
+//                listOfInterlocutors.forEach {
+//                    val ref = FirebaseDatabase.getInstance().getReference("/latest_messages").child(it).child(currentUser.id)
+//                    allCurrentUserReferences.add(ref)
+//                }
+//                allCurrentUserReferences.add(refUser)
+//                allCurrentUserReferences.add(refTokens)
+//                allCurrentUserReferences.add(refUserInChat)
+//                allCurrentUserReferences.add(refUserMessages)
+//                allCurrentUserReferences.add(refCurrentUserLatestMessages)
+//
+//                allCurrentUserReferences.forEach {
+//                    it.removeValue()
+//                }
+//
+//                if (currentUser.imageUrl != MainActivity.ANONYMOUS_AVATAR_URL) {
+//                    FirebaseStorage.getInstance().getReference("/avatars/${FirebaseAuth.getInstance().currentUser!!.email}").delete()
+//                }
+//                FirebaseAuth.getInstance().currentUser!!.delete()
+//                //FirebaseAuth.getInstance().signOut()
+//                val intent = Intent(this@EditProfileActivity, MainActivity::class.java)
+//                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK.or(Intent.FLAG_ACTIVITY_NEW_TASK)
+//                startActivity(intent)
+//                finish()
+//            }
+//
+//            override fun onStart() {
+//                Log.d("onGetDataListener","onStart is running")
+//            }
+//
+//            override fun onFailure() {
+//                Log.d("onGetDataListener","onFailure is running")
+//            }
+//
+//        })
+//    }
 
     private fun readData(reference: DatabaseReference,listener: OnGetDataListener) {
         listener.onStart()

@@ -1,11 +1,14 @@
 package com.example.messengeryoutube.messages
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.PopupMenu
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.bumptech.glide.Glide
@@ -15,6 +18,7 @@ import com.example.messengeryoutube.databinding.ActivityLatestMessagesBinding
 import com.example.messengeryoutube.notification.Token
 import com.example.messengeryoutube.registration.MainActivity
 import com.example.messengeryoutube.registration.User
+import com.example.messengeryoutube.toast
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.google.firebase.iid.FirebaseInstanceId
@@ -55,13 +59,47 @@ class LatestMessagesActivity : AppCompatActivity() {
             )
         }
         groupAdapter.setOnItemClickListener { item, _ ->
-            val interlocutorUser = item as LatestMessageItem
-            val intent = Intent(this,ChatLogActivity::class.java)
-            intent.putExtra(NewMessageActivity.INTERLOCUTOR_USER,interlocutorUser.interlocutorUser)
-            intent.putExtra(CURRENT_USER_KEY,currentUser)
-            startActivity(intent)
+            val interlocutorUserInGroupAdapter = item as LatestMessageItem
+            goOverInChat(interlocutorUserInGroupAdapter)
+        }
+        groupAdapter.setOnItemLongClickListener { item, view ->
+            val interlocutorUserInGroupAdapter = item as LatestMessageItem
+
+            val popupMenu = PopupMenu(this,view)
+            popupMenu.menuInflater.inflate(R.menu.popup_menu_latest_messages,popupMenu.menu)
+            popupMenu.setOnMenuItemClickListener {
+                when(it.itemId) {
+                    R.id.go_over_in_chat -> {
+                        goOverInChat(interlocutorUserInGroupAdapter)
+                        true
+                    }
+                    R.id.delete_messages -> {
+                        createAlertDialogConfirmDelete(interlocutorUserInGroupAdapter)!!.show()
+                        true
+                    }
+                    else -> true
+                }
+            }
+            popupMenu.gravity = Gravity.RIGHT
+            popupMenu.show()
+            true
         }
         updateToken(FirebaseInstanceId.getInstance().token)
+    }
+
+    private fun deleteCorrespondence(interlocutorUserInGroupAdapter: LatestMessagesActivity.LatestMessageItem) {
+        val referenceLatestMessages = FirebaseDatabase.getInstance().getReference("/latest_messages/${currentUser!!.id}")
+        val referenceUsersMessages = FirebaseDatabase.getInstance().getReference("/users_messages/${currentUser!!.id}")
+
+        referenceLatestMessages.child(interlocutorUserInGroupAdapter.interlocutorUser!!.id).removeValue()
+        referenceUsersMessages.child(interlocutorUserInGroupAdapter.interlocutorUser!!.id).removeValue()
+    }
+
+    private fun goOverInChat(interlocutorUserInGroupAdapter: LatestMessagesActivity.LatestMessageItem) {
+        val intent = Intent(this,ChatLogActivity::class.java)
+        intent.putExtra(NewMessageActivity.INTERLOCUTOR_USER,interlocutorUserInGroupAdapter.interlocutorUser)
+        intent.putExtra(CURRENT_USER_KEY,currentUser)
+        startActivity(intent)
     }
 
     override fun onStart() {
@@ -92,6 +130,20 @@ class LatestMessagesActivity : AppCompatActivity() {
         })
     }
 
+    private fun createAlertDialogConfirmDelete(interlocutorUserInGroupAdapter: LatestMessageItem): AlertDialog? {
+        return with(AlertDialog.Builder(this)) {
+            setTitle("Подтверждение удаления")
+            setPositiveButton("Подтвердить") { currentDialog, _ ->
+                deleteCorrespondence(interlocutorUserInGroupAdapter)
+                currentDialog.cancel()
+            }
+            setNegativeButton("Отмена") {currentDialog, _ ->
+                currentDialog.cancel()
+            }
+            create()
+        }
+    }
+
     private fun listenForLatestMessages() {
         val fromUserId = FirebaseAuth.getInstance().uid
         val ref = FirebaseDatabase.getInstance().getReference("/latest_messages/$fromUserId")
@@ -113,20 +165,26 @@ class LatestMessagesActivity : AppCompatActivity() {
             }
 
             override fun onChildRemoved(p0: DataSnapshot) {
-                TODO("Not yet implemented")
+                fillAndRefreshLatestMessagesRecyclerView(p0,isCorrespondenceRemove = true)
             }
         })
     }
 
-    private fun fillAndRefreshLatestMessagesRecyclerView(p0: DataSnapshot?, isUserDataChange: Boolean = false) {
-            if (!isUserDataChange) {
+    private fun fillAndRefreshLatestMessagesRecyclerView(p0: DataSnapshot?, isUserDataChange: Boolean = false,
+                                                         isCorrespondenceRemove: Boolean = false) {
+            if (!isUserDataChange && !isCorrespondenceRemove) {
                 val chatMessage = p0!!.getValue(ChatMessage::class.java) ?: return
                 latestMessagesHashMap[p0.key!!] = chatMessage
 
                 groupAdapter.clear()
                 latestMessagesHashMap.values.sortedByDescending { it.timestamp }.forEach { groupAdapter.add(LatestMessageItem(it)) }
-            }else {
+            }else if (isUserDataChange && !isCorrespondenceRemove){
                 latestMessagesHashMap.values.sortedByDescending { it.timestamp }.forEach { _ -> groupAdapter.notifyDataSetChanged() }
+            }else if (isCorrespondenceRemove) {
+                latestMessagesHashMap.remove(p0.key)
+
+                groupAdapter.clear()
+                latestMessagesHashMap.values.sortedByDescending { it.timestamp }.forEach { groupAdapter.add(LatestMessageItem(it)) }
             }
     }
 

@@ -119,7 +119,7 @@ class ChatLogActivity : AppCompatActivity() {
             }
 
             override fun onChildRemoved(p0: DataSnapshot) {
-                TODO("Not yet implemented")
+                finish()
             }
 
         })
@@ -168,7 +168,7 @@ class ChatLogActivity : AppCompatActivity() {
         message: String
     ) {
         val tokens = FirebaseDatabase.getInstance().getReference("/tokens")
-        val query = tokens.orderByKey().equalTo(receiver) //receiver - не то, поэтому token = ""
+        val query = tokens.orderByKey().equalTo(receiver)
             query.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 for(snapShot in dataSnapshot.children) {

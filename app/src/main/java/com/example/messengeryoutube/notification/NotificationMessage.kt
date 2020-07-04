@@ -6,7 +6,6 @@ import android.content.Intent
 import android.media.RingtoneManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import com.example.messengeryoutube.R
 import com.example.messengeryoutube.messages.ChatLogActivity
 import com.example.messengeryoutube.messages.LatestMessagesActivity
 import com.example.messengeryoutube.messages.NewMessageActivity
@@ -19,16 +18,34 @@ class NotificationMessage(val currentUser: User,val interlocutorUser: User) {
         const val CHANNEL_NAME = "уведомление"
         const val CHANNEL_DESCRIPTION = "оповещение о новом сообщении"
         const val PENDING_INTENT_ID = 1
+//        const val GROUP_NOTIFICATION = "group notification"
+//        const val REPLY_KEY = "reply key"
     }
 
         fun createNotification(context: Context,userName: String,message: String): Notification {
             val intent = Intent(context,ChatLogActivity::class.java)
             intent.putExtra(NewMessageActivity.INTERLOCUTOR_USER,interlocutorUser)
             intent.putExtra(LatestMessagesActivity.CURRENT_USER_KEY,currentUser)
+
             val taskStackBuilder = TaskStackBuilder.create(context)
                                     .addParentStack(ChatLogActivity::class.java)
                                     .addNextIntent(intent)
             val pendingIntent = taskStackBuilder.getPendingIntent(PENDING_INTENT_ID,PendingIntent.FLAG_UPDATE_CURRENT)
+
+//            val remoteInput = RemoteInput.Builder(REPLY_KEY).run {
+//                setLabel("Ваш ответ...")
+//                build()
+//            }
+//
+//            val replyIntent = Intent(context, MyFirebaseMessaging::class.java)
+//            val replyPendingIntent = PendingIntent.getService(context,0,replyIntent,0)
+//
+//            val replyAction = NotificationCompat.Action.Builder(
+//                android.R.drawable.ic_menu_send,
+//                "Ответить",
+//                replyPendingIntent
+//            ).addRemoteInput(remoteInput).build()
+
             return NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(android.R.drawable.sym_action_chat)
                 .setContentTitle(userName)
@@ -36,6 +53,7 @@ class NotificationMessage(val currentUser: User,val interlocutorUser: User) {
                 .setContentIntent(pendingIntent)
                 .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+//                .addAction(replyAction)
                 .build()!!
         }
 

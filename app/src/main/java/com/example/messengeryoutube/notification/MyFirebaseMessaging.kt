@@ -1,10 +1,9 @@
 package com.example.messengeryoutube.notification
 
 import android.app.NotificationManager
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.app.PendingIntent
+import android.app.RemoteInput
+import android.content.*
 import android.os.Build
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.example.messengeryoutube.messages.LatestMessagesActivity
@@ -18,14 +17,11 @@ import com.squareup.moshi.Moshi
 
 
 class MyFirebaseMessaging: FirebaseMessagingService() {
-//    private var currentUser: User? = null
-//    private var interlocutorUser: User? = null
-
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
         val firebaseUser = FirebaseAuth.getInstance().currentUser
 
-        if (firebaseUser != null && remoteMessage.data.isNotEmpty()) { //remoteMessage.data.isNorEmpty return FALSE!!!!!
+        if (firebaseUser != null && remoteMessage.data.isNotEmpty()) {
             sendNotification(remoteMessage)
         }
     }

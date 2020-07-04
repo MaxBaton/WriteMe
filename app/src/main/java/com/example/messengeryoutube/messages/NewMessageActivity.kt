@@ -14,6 +14,7 @@ import com.example.messengeryoutube.CustomActionBar
 import com.example.messengeryoutube.R
 import com.example.messengeryoutube.databinding.ActivityNewMessageBinding
 import com.example.messengeryoutube.registration.User
+import com.example.messengeryoutube.toast
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.xwray.groupie.GroupAdapter
@@ -57,25 +58,23 @@ class NewMessageActivity : AppCompatActivity() {
             }
 
             override fun onChildChanged(p0: DataSnapshot, p1: String?) {
-                if (p0.key != currentUser!!.id) {
-                    val user = p0.getValue(User::class.java)
-                    fetchUser(isStatusChange = true,userFromChangeStatus = user)
-                }
+                fetchUser(isStatusChange = true)
             }
 
             override fun onChildAdded(p0: DataSnapshot, p1: String?) {
-                val a = 3
+                Log.d("NewMessageActivity","add user")
             }
 
             override fun onChildRemoved(p0: DataSnapshot) {
-                TODO("Not yet implemented")
+                val user = p0.getValue(User::class.java)
+                fetchUser(isUserRemove = true,deleteUser = user)
             }
         })
     }
 
-    private fun fetchUser(isStatusChange: Boolean = false, userFromChangeStatus: User? = null) {
+    private fun fetchUser(isStatusChange: Boolean = false,isUserRemove: Boolean = false,deleteUser: User? = null) {
         val ref = FirebaseDatabase.getInstance().getReference("/users")
-        if (!isStatusChange) {
+        if (!isStatusChange && !isUserRemove) {
             ref.addListenerForSingleValueEvent(object: ValueEventListener{
                 override fun onCancelled(p0: DatabaseError) {
                     Log.d("NewMessageActivity","users canceled")
@@ -105,8 +104,19 @@ class NewMessageActivity : AppCompatActivity() {
                         DividerItemDecoration(this@NewMessageActivity, DividerItemDecoration.VERTICAL))
                 }
             })
-        }else {
+        }else if (isStatusChange && !isUserRemove) {
             listOfUsers.forEach { _ -> groupAdapter.notifyDataSetChanged() }
+        }else if (isUserRemove) {
+            var position = 0
+            listOfUsers.forEachIndexed { index, user ->
+                if (user.id == deleteUser!!.id) {
+                    position = index
+                    return@forEachIndexed
+                }
+            }
+            listOfUsers.removeAt(position)
+            groupAdapter.notifyItemRemoved(position)
+            groupAdapter.notifyDataSetChanged()
         }
     }
 

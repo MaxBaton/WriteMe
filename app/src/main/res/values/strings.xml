@@ -20,4 +20,8 @@
 
 <!--    Delete account in EditProfileActivity.kt -->
     <string name="menu_delete_user">Удалить аккаунт</string>
+
+<!--    Popup menu in LatestMessagesActivity.kt-->
+    <string name="go_over_in_chat">Перейти к диалогу</string>
+    <string name="delete_messages">Удалить переписку</string>
 </resources>
