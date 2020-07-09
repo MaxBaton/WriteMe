@@ -2,6 +2,8 @@ package com.example.messengeryoutube.messages
 
 import android.app.AlertDialog
 import android.content.Intent
+import android.opengl.Visibility
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
@@ -14,6 +16,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import com.bumptech.glide.Glide
 import com.example.messengeryoutube.CustomActionBar
 import com.example.messengeryoutube.R
+import com.example.messengeryoutube.createPopupMenu
 import com.example.messengeryoutube.databinding.ActivityLatestMessagesBinding
 import com.example.messengeryoutube.notification.Token
 import com.example.messengeryoutube.registration.MainActivity
@@ -65,8 +68,7 @@ class LatestMessagesActivity : AppCompatActivity() {
         groupAdapter.setOnItemLongClickListener { item, view ->
             val interlocutorUserInGroupAdapter = item as LatestMessageItem
 
-            val popupMenu = PopupMenu(this,view)
-            popupMenu.menuInflater.inflate(R.menu.popup_menu_latest_messages,popupMenu.menu)
+            val popupMenu = createPopupMenu(R.menu.popup_menu_latest_messages,view)
             popupMenu.setOnMenuItemClickListener {
                 when(it.itemId) {
                     R.id.go_over_in_chat -> {
@@ -80,7 +82,6 @@ class LatestMessagesActivity : AppCompatActivity() {
                     else -> true
                 }
             }
-            popupMenu.gravity = Gravity.RIGHT
             popupMenu.show()
             true
         }
@@ -181,7 +182,7 @@ class LatestMessagesActivity : AppCompatActivity() {
             }else if (isUserDataChange && !isCorrespondenceRemove){
                 latestMessagesHashMap.values.sortedByDescending { it.timestamp }.forEach { _ -> groupAdapter.notifyDataSetChanged() }
             }else if (isCorrespondenceRemove) {
-                latestMessagesHashMap.remove(p0.key)
+                latestMessagesHashMap.remove(p0!!.key)
 
                 groupAdapter.clear()
                 latestMessagesHashMap.values.sortedByDescending { it.timestamp }.forEach { groupAdapter.add(LatestMessageItem(it)) }

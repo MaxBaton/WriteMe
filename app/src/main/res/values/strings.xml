@@ -24,4 +24,9 @@
 <!--    Popup menu in LatestMessagesActivity.kt-->
     <string name="go_over_in_chat">Перейти к диалогу</string>
     <string name="delete_messages">Удалить переписку</string>
+
+<!--    Popup menu in ChatLogActivity.kt-->
+    <string name="delete_from_me">Удалить у меня</string>
+    <string name="delete_from_both">Удалить у обоих</string>
+    <string name="edit_message">Редактировать сообщение</string>
 </resources>

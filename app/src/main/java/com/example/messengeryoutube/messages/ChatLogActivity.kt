@@ -1,9 +1,8 @@
 package com.example.messengeryoutube.messages
 
+import android.app.AlertDialog
 import android.app.NotificationManager
 import android.content.Context
-import android.content.Intent
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
@@ -25,6 +24,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import com.example.messengeryoutube.R
+import com.example.messengeryoutube.createPopupMenu
 import com.squareup.moshi.Moshi
 
 
@@ -36,6 +36,7 @@ class ChatLogActivity : AppCompatActivity() {
     private lateinit var apiService: APIService
     private var notify: Boolean = false
     private var isInterlocutorInChat: Boolean = false
+    private val listOfMessages = mutableListOf<ChatMessage>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,7 +61,62 @@ class ChatLogActivity : AppCompatActivity() {
             recyclerViewChat.adapter = groupAdapter
         }
 
+        groupAdapter.setOnItemLongClickListener { item, view ->
+            val popupMenu = createPopupMenu(R.menu.popup_menu_chat_log_activity,view)
+            val isInterlocutorClass = if (item::class.java == InterlocutorChatItem::class.java) {
+                popupMenu.menu.getItem(1).isVisible = false
+                popupMenu.menu.getItem(2).isVisible = false
+                true
+            }else false
+            popupMenu.show()
+
+            popupMenu.setOnMenuItemClickListener {
+                when(it.itemId) {
+                    R.id.delete_from_me -> {
+                        with(AlertDialog.Builder(this)) {
+                            setTitle("Удалить сообщение?")
+                            setPositiveButton("Да") { _, _ ->
+                                DeleteMessageFromMe().deleteMessageFromMe(currentUser = currentUser!!,interlocutorUser = interlocutorUser!!,
+                                    listOfMessages = listOfMessages,chatMessageItem = item, isInterlocutorClass = isInterlocutorClass)
+                            }
+                            setNegativeButton("Отмена") {dialog, _ -> dialog.cancel() }
+                            create()
+                        }.show()
+                        true
+                    }
+                    R.id.delete_from_both -> {
+                        with(AlertDialog.Builder(this)) {
+                            setTitle("Удалить сообщение?")
+                            setPositiveButton("Да") { _, _ ->
+                                DeleteMessageFromBoth().deleteFromBoth(currentUser = currentUser!!, interlocutorUser = interlocutorUser!!,
+                                    listOfMessages = listOfMessages, chatMessageItem = item)
+                            }
+                            setNegativeButton("Отмена") {dialog, _ -> dialog.cancel() }
+                            create()
+                        }.show()
+                        true
+                    }
+                    R.id.edit_message -> {
+                        toast("edit message")
+                        true
+                    }
+                    else -> true
+                }
+            }
+            true
+        }
+
         listenForMessages()
+    }
+
+    private fun deleteMessageFromList(chatItemId: String) {
+        var deleteIndex = 0
+        listOfMessages.forEachIndexed { index, chatMessage ->
+            if (chatMessage.id == chatItemId) {
+                deleteIndex = index
+            }
+        }
+        listOfMessages.removeAt(deleteIndex)
     }
 
     override fun onResume() {
@@ -98,10 +154,11 @@ class ChatLogActivity : AppCompatActivity() {
         ref.addChildEventListener(object: ChildEventListener{
             override fun onChildAdded(p0: DataSnapshot, p1: String?) {
                 val chatMessage = p0.getValue(ChatMessage::class.java)
-                if (chatMessage?.fromUserId == FirebaseAuth.getInstance().uid){
-                    groupAdapter.add(MyChatItem(chatMessage!!.text))
+                listOfMessages.add(chatMessage!!)
+                if (chatMessage.fromUserId == FirebaseAuth.getInstance().uid){
+                    groupAdapter.add(MyChatItem(chatMessage.text,chatMessage.id))
                 }else {
-                    groupAdapter.add(InterlocutorChatItem(chatMessage!!.text))
+                    groupAdapter.add(InterlocutorChatItem(chatMessage.text,chatMessage.id))
                 }
                 binding.recyclerViewChat.scrollToPosition(groupAdapter.itemCount - 1)
             }
@@ -119,9 +176,18 @@ class ChatLogActivity : AppCompatActivity() {
             }
 
             override fun onChildRemoved(p0: DataSnapshot) {
-                finish()
-            }
+                val message = p0.getValue(ChatMessage::class.java)
+                deleteMessageFromList(message!!.id)
+                groupAdapter.clear()
 
+                listOfMessages.forEach {
+                    if (it.fromUserId == currentUser!!.id) {
+                        groupAdapter.add(MyChatItem(it.text,it.id))
+                    }else {
+                        groupAdapter.add(InterlocutorChatItem(it.text,it.id))
+                    }
+                }
+            }
         })
     }
 
@@ -132,7 +198,8 @@ class ChatLogActivity : AppCompatActivity() {
         val interlocutorUserReference = FirebaseDatabase.getInstance().getReference("/users_messages/$interlocutorUserId/$fromUserId").push()
         if (currentUserReference.key == null) return
 
-        val chatMessage = ChatMessage(currentUserReference.key!!,text, fromUserId,interlocutorUserId,System.currentTimeMillis()/1000)
+        val timestamp = System.currentTimeMillis()/1000
+        val chatMessage = ChatMessage(currentUserReference.key!!,text, fromUserId,interlocutorUserId,timestamp)
         currentUserReference.setValue(chatMessage).addOnSuccessListener {
             binding.editTextPutMessage.text.clear()
             binding.recyclerViewChat.scrollToPosition(groupAdapter.itemCount - 1)
@@ -207,12 +274,6 @@ class ChatLogActivity : AppCompatActivity() {
         })
     }
 
-    private fun tuneActionBar(title: String) {
-        supportActionBar?.title = title
-        supportActionBar?.setBackgroundDrawable(ColorDrawable(window.statusBarColor))
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-    }
-
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if(item.itemId == android.R.id.home) finish()
         return super.onOptionsItemSelected(item)
@@ -223,7 +284,7 @@ class ChatLogActivity : AppCompatActivity() {
         setUserInChatFlag(false)
     }
 
-    inner class InterlocutorChatItem(val text: String) : Item<GroupieViewHolder>() {
+    inner class InterlocutorChatItem(val text: String,val id: String) : Item<GroupieViewHolder>() {
         override fun getLayout() = R.layout.interlocutor_message_in_chat
 
         override fun bind(viewHolder: GroupieViewHolder, position: Int) {
@@ -236,7 +297,7 @@ class ChatLogActivity : AppCompatActivity() {
         }
     }
 
-    inner class MyChatItem(val text: String) : Item<GroupieViewHolder>() {
+    inner class MyChatItem(val text: String,val id: String) : Item<GroupieViewHolder>() {
         override fun getLayout() = R.layout.my_message_in_chat
 
         override fun bind(viewHolder: GroupieViewHolder, position: Int) {

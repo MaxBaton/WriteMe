@@ -197,7 +197,7 @@ class EditProfileActivity : AppCompatActivity() {
     private fun createAlertDialogConfirmDelete(): AlertDialog? {
         return with(AlertDialog.Builder(this)) {
             setTitle("Подтверждение удаления")
-            val positiveButton = setPositiveButton("Подтвердить") { currentDialog, _ ->
+            setPositiveButton("Подтвердить") { currentDialog, _ ->
                 currentDialog.cancel()
 
                 //deleteAccount() //defer execution for now!!!
