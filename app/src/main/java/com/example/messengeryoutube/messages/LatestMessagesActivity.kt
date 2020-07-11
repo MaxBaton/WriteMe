@@ -1,6 +1,8 @@
 package com.example.messengeryoutube.messages
 
 import android.app.AlertDialog
+import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
 import android.opengl.Visibility
 import android.os.Build
@@ -18,6 +20,7 @@ import com.example.messengeryoutube.CustomActionBar
 import com.example.messengeryoutube.R
 import com.example.messengeryoutube.createPopupMenu
 import com.example.messengeryoutube.databinding.ActivityLatestMessagesBinding
+import com.example.messengeryoutube.notification.NotificationMessage
 import com.example.messengeryoutube.notification.Token
 import com.example.messengeryoutube.registration.MainActivity
 import com.example.messengeryoutube.registration.User
@@ -167,6 +170,8 @@ class LatestMessagesActivity : AppCompatActivity() {
 
             override fun onChildRemoved(p0: DataSnapshot) {
                 fillAndRefreshLatestMessagesRecyclerView(p0,isCorrespondenceRemove = true)
+                val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                notificationManager.cancel(NotificationMessage.NOTIFICATION_ID)
             }
         })
     }

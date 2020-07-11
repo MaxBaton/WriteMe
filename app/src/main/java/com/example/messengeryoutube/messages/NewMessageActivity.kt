@@ -107,16 +107,10 @@ class NewMessageActivity : AppCompatActivity() {
         }else if (isStatusChange && !isUserRemove) {
             listOfUsers.forEach { _ -> groupAdapter.notifyDataSetChanged() }
         }else if (isUserRemove) {
-            var position = 0
-            listOfUsers.forEachIndexed { index, user ->
-                if (user.id == deleteUser!!.id) {
-                    position = index
-                    return@forEachIndexed
-                }
-            }
-            listOfUsers.removeAt(position)
-            groupAdapter.notifyItemRemoved(position)
-            groupAdapter.notifyDataSetChanged()
+            listOfUsers.remove(deleteUser)
+
+            groupAdapter.clear()
+            listOfUsers.forEach { groupAdapter.add(UserItem(it)) }
         }
     }
 

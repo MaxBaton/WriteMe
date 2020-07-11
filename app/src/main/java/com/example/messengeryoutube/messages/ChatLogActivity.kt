@@ -6,6 +6,8 @@ import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
+import android.widget.EditText
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.example.messengeryoutube.CustomActionBar
@@ -97,7 +99,23 @@ class ChatLogActivity : AppCompatActivity() {
                         true
                     }
                     R.id.edit_message -> {
-                        toast("edit message")
+                        val view = layoutInflater.inflate(R.layout.confirm_edit_message_in_chat,null)
+                        val editTextEditMessage = view.findViewById<EditText>(R.id.edit_text_confirm_edit_message)
+                        val oldText = (item as MyChatItem).text
+                        editTextEditMessage.setText(oldText, TextView.BufferType.EDITABLE)
+
+                        with(AlertDialog.Builder(this)) {
+                            setTitle("Редактирование сообщения")
+                            setView(view)
+                            setCancelable(false)
+                            setPositiveButton("Изменить") {_,_ ->
+                                val message = editTextEditMessage.text.toString()
+                                EditMessage().editMessage(message = message,currentUser = currentUser!!, interlocutorUser = interlocutorUser!!,
+                                     chatMessageItem = item)
+                            }
+                            setNegativeButton("Отмена") {_,_ -> }
+                            create()
+                        }.show()
                         true
                     }
                     else -> true
@@ -117,6 +135,35 @@ class ChatLogActivity : AppCompatActivity() {
             }
         }
         listOfMessages.removeAt(deleteIndex)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        val refUser = FirebaseDatabase.getInstance().getReference("/users")
+        refUser.addChildEventListener(object: ChildEventListener{
+            override fun onCancelled(error: DatabaseError) {
+                Log.d("ChatLogActivity","user is canceled")
+            }
+
+            override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {
+                TODO("Not yet implemented")
+            }
+
+            override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
+                Log.d("ChatLogActivity","user change")
+            }
+
+            override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
+                Log.d("ChatLogActivity","new user add")
+            }
+
+            override fun onChildRemoved(snapshot: DataSnapshot) {
+                val user = snapshot.getValue(User::class.java)
+                if (user!!.id == interlocutorUser!!.id) {
+                    finish()
+                }
+            }
+        })
     }
 
     override fun onResume() {
@@ -172,23 +219,35 @@ class ChatLogActivity : AppCompatActivity() {
             }
 
             override fun onChildChanged(p0: DataSnapshot, p1: String?) {
-                TODO("Not yet implemented")
+                val message = p0.getValue(ChatMessage::class.java)
+                listOfMessages.forEachIndexed { index, chatMessage ->
+                    if (chatMessage.id == message!!.id){
+                        listOfMessages[index] = message
+                        refreshRecyclerView()
+                        return
+                    }
+                }
             }
 
             override fun onChildRemoved(p0: DataSnapshot) {
                 val message = p0.getValue(ChatMessage::class.java)
                 deleteMessageFromList(message!!.id)
-                groupAdapter.clear()
 
-                listOfMessages.forEach {
-                    if (it.fromUserId == currentUser!!.id) {
-                        groupAdapter.add(MyChatItem(it.text,it.id))
-                    }else {
-                        groupAdapter.add(InterlocutorChatItem(it.text,it.id))
-                    }
-                }
+                refreshRecyclerView()
             }
         })
+    }
+
+    private fun refreshRecyclerView() {
+        groupAdapter.clear()
+
+        listOfMessages.forEach {
+            if (it.fromUserId == currentUser!!.id) {
+                groupAdapter.add(MyChatItem(it.text,it.id))
+            }else {
+                groupAdapter.add(InterlocutorChatItem(it.text,it.id))
+            }
+        }
     }
 
     private fun performSendMessage(text: String) {

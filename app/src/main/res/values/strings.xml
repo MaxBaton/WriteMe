@@ -29,4 +29,7 @@
     <string name="delete_from_me">Удалить у меня</string>
     <string name="delete_from_both">Удалить у обоих</string>
     <string name="edit_message">Редактировать сообщение</string>
+
+<!--    Edit message in ChatLogActivity.kt-->
+    <string name="input_new_message">Введите новое сообщение</string>
 </resources>

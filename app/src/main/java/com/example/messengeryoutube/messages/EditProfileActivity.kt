@@ -196,12 +196,16 @@ class EditProfileActivity : AppCompatActivity() {
 
     private fun createAlertDialogConfirmDelete(): AlertDialog? {
         return with(AlertDialog.Builder(this)) {
-            setTitle("Подтверждение удаления")
-            setPositiveButton("Подтвердить") { currentDialog, _ ->
+            setTitle("Удалить аккаунт?")
+            setPositiveButton("Удалить") { currentDialog, _ ->
                 currentDialog.cancel()
 
-                //deleteAccount() //defer execution for now!!!
+                DeleteAccount().delete(currentUser = currentUser)
 
+                val intent = Intent(this@EditProfileActivity, MainActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK.or(Intent.FLAG_ACTIVITY_NEW_TASK)
+                startActivity(intent)
+                finish()
             }
             setNegativeButton("Отмена") {currentDialog, _ ->
                 currentDialog.cancel()
@@ -265,11 +269,6 @@ class EditProfileActivity : AppCompatActivity() {
 //                    FirebaseStorage.getInstance().getReference("/avatars/${FirebaseAuth.getInstance().currentUser!!.email}").delete()
 //                }
 //                FirebaseAuth.getInstance().currentUser!!.delete()
-//                //FirebaseAuth.getInstance().signOut()
-//                val intent = Intent(this@EditProfileActivity, MainActivity::class.java)
-//                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK.or(Intent.FLAG_ACTIVITY_NEW_TASK)
-//                startActivity(intent)
-//                finish()
 //            }
 //
 //            override fun onStart() {
@@ -283,19 +282,19 @@ class EditProfileActivity : AppCompatActivity() {
 //        })
 //    }
 
-    private fun readData(reference: DatabaseReference,listener: OnGetDataListener) {
-        listener.onStart()
-        reference.addListenerForSingleValueEvent(object: ValueEventListener{
-            override fun onCancelled(error: DatabaseError) {
-                listener.onFailure()
-            }
-
-            override fun onDataChange(snapshot: DataSnapshot) {
-                listener.onSuccess(snapshot)
-            }
-
-        })
-    }
+//    private fun readData(reference: DatabaseReference,listener: OnGetDataListener) {
+//        listener.onStart()
+//        reference.addListenerForSingleValueEvent(object: ValueEventListener{
+//            override fun onCancelled(error: DatabaseError) {
+//                listener.onFailure()
+//            }
+//
+//            override fun onDataChange(snapshot: DataSnapshot) {
+//                listener.onSuccess(snapshot)
+//            }
+//
+//        })
+//    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
