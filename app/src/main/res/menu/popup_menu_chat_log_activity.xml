@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/delete_from_me"
+        android:title="@string/delete_from_me" />
+    <item
+        android:id="@+id/delete_from_both"
+        android:title="@string/delete_from_both" />
+    <item
+        android:id="@+id/edit_message"
+        android:title="@string/edit_message" />
+</menu>

@@ -2,25 +2,19 @@ package com.example.messengeryoutube.registration
 
 import android.app.Activity
 import android.app.AlertDialog
-import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.ImageDecoder
-import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.view.Menu
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
-import com.bumptech.glide.Priority
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.request.RequestOptions
-import com.example.messengeryoutube.CustomActionBar
-import com.example.messengeryoutube.R
+import com.example.messengeryoutube.*
 import com.example.messengeryoutube.databinding.ActivityMainBinding
 import com.example.messengeryoutube.messages.LatestMessagesActivity
-import com.example.messengeryoutube.toast
-import com.example.messengeryoutube.toastLong
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
@@ -28,7 +22,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import java.net.URL
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -122,6 +115,20 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
+    private fun uploadImageInFirebaseStorage(email: String) {
+        if (selectPhotoUri == null){
+            registerUserOnDatabase(ANONYMOUS_AVATAR_URL)
+        }else {
+            val ref = FirebaseStorage.getInstance().getReference("/avatars/$email")
+            ref.putFile(selectPhotoUri!!)
+                .addOnSuccessListener {
+                    ref.downloadUrl.addOnSuccessListener {
+                        registerUserOnDatabase(it.toString())
+                    }
+                }
+        }
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -139,17 +146,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun uploadImageInFirebaseStorage(email: String) {
-        if (selectPhotoUri == null){
-            registerUserOnDatabase(ANONYMOUS_AVATAR_URL)
-        }else {
-            val ref = FirebaseStorage.getInstance().getReference("/avatars/$email")
-            ref.putFile(selectPhotoUri!!)
-                .addOnSuccessListener {
-                    ref.downloadUrl.addOnSuccessListener {
-                        registerUserOnDatabase(it.toString())
-                    }
-                }
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_main_activity,menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.menu_reference) {
+            val dialogReference = createReferenceAlertDialog()
+            dialogReference.show()
         }
+        return super.onOptionsItemSelected(item)
     }
 }
