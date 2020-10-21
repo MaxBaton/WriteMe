@@ -14,7 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.example.writeMe.*
 import com.example.writeMe.databinding.ActivityMainBinding
-import com.example.writeMe.messages.LatestMessagesActivity
+import com.example.writeMe.messages.latestMessages.LatestMessagesActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
@@ -110,7 +110,7 @@ class MainActivity : AppCompatActivity() {
         job!!.cancel()
         dialog?.dismiss()
 
-        val intent = Intent(this@MainActivity,LatestMessagesActivity::class.java)
+        val intent = Intent(this@MainActivity, LatestMessagesActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK.or(Intent.FLAG_ACTIVITY_NEW_TASK)
         startActivity(intent)
     }

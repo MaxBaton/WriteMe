@@ -6,9 +6,9 @@ import android.content.Intent
 import android.media.RingtoneManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import com.example.writeMe.messages.ChatLogActivity
-import com.example.writeMe.messages.LatestMessagesActivity
-import com.example.writeMe.messages.NewMessageActivity
+import com.example.writeMe.messages.chatLog.ChatLogActivity
+import com.example.writeMe.messages.latestMessages.LatestMessagesActivity
+import com.example.writeMe.messages.newMessages.NewMessageActivity
 import com.example.writeMe.registration.User
 
 class NotificationMessage(val currentUser: User,val interlocutorUser: User) {
@@ -21,7 +21,7 @@ class NotificationMessage(val currentUser: User,val interlocutorUser: User) {
     }
 
         fun createNotification(context: Context,userName: String,message: String): Notification {
-            val intent = Intent(context,ChatLogActivity::class.java)
+            val intent = Intent(context, ChatLogActivity::class.java)
             intent.putExtra(NewMessageActivity.INTERLOCUTOR_USER,interlocutorUser)
             intent.putExtra(LatestMessagesActivity.CURRENT_USER_KEY,currentUser)
 

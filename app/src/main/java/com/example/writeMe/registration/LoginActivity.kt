@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.writeMe.CustomActionBar
 import com.example.writeMe.R
 import com.example.writeMe.databinding.ActivityLoginBinding
-import com.example.writeMe.messages.LatestMessagesActivity
+import com.example.writeMe.messages.latestMessages.LatestMessagesActivity
 import com.example.writeMe.toast
 import com.example.writeMe.toastLong
 import com.google.firebase.auth.FirebaseAuth

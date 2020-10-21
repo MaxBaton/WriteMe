@@ -15,19 +15,19 @@
         android:theme="@style/AppTheme"
         android:fullBackupContent="@xml/backup_descriptor">
 
-        <activity android:name="com.example.writeMe.messages.EditProfileActivity" />
+        <activity android:name="com.example.writeMe.messages.editProfile.EditProfileActivity" />
 
         <activity
-            android:name="com.example.writeMe.messages.NewMessageActivity"
-            android:parentActivityName="com.example.writeMe.messages.LatestMessagesActivity">
+            android:name="com.example.writeMe.messages.newMessages.NewMessageActivity"
+            android:parentActivityName="com.example.writeMe.messages.latestMessages.LatestMessagesActivity">
         </activity>
 
-        <activity android:name="com.example.writeMe.messages.ChatLogActivity"
-            android:parentActivityName="com.example.writeMe.messages.LatestMessagesActivity">
+        <activity android:name="com.example.writeMe.messages.chatLog.ChatLogActivity"
+            android:parentActivityName="com.example.writeMe.messages.latestMessages.LatestMessagesActivity">
         </activity>
 
         <activity
-            android:name="com.example.writeMe.messages.LatestMessagesActivity"
+            android:name="com.example.writeMe.messages.latestMessages.LatestMessagesActivity"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -50,7 +50,7 @@
             </intent-filter>
         </service>
 
-        <service android:name="com.example.writeMe.messages.CloseAppService"/>
+        <service android:name="com.example.writeMe.messages.latestMessages.CloseAppService"/>
     </application>
 
 </manifest>
