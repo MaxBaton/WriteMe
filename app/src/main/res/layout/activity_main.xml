@@ -56,7 +56,14 @@
         <Button
             android:id="@+id/btn_register"
             style="@style/ButtonRegistration"
+            android:layout_width="match_parent"
             android:text="@string/registration_button" />
+
+        <Button
+            android:id="@+id/btn_register_google"
+            android:layout_width="match_parent"
+            style="@style/ButtonRegistration"
+            android:text="Войти через гугл" />
 
         <TextView
             android:id="@+id/textView_already_registered"

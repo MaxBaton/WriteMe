@@ -8,6 +8,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
@@ -15,8 +16,15 @@ import com.bumptech.glide.Glide
 import com.example.writeMe.*
 import com.example.writeMe.databinding.ActivityMainBinding
 import com.example.writeMe.messages.latestMessages.LatestMessagesActivity
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -28,9 +36,12 @@ class MainActivity : AppCompatActivity() {
     private  var selectPhotoUri: Uri? = null
     private var dialog: AlertDialog? = null
     private var job: Job? = null
+    private lateinit var mGoogleSignInClient: GoogleSignInClient
+    private lateinit var auth: FirebaseAuth
 
     companion object{
         const val ANONYMOUS_AVATAR_URL = "https://iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png"
+        private const val RC_SIGN_IN = 123
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,7 +74,17 @@ class MainActivity : AppCompatActivity() {
 
                 createAlertDialog()
                 dialog?.show()
-                job = GlobalScope.launch(Dispatchers.IO) { performRegister(email = email,password = password) }
+                performRegister(email = email,password = password)
+            }
+
+            btnRegisterGoogle.setOnClickListener {
+                auth = FirebaseAuth.getInstance()
+
+                createRequest()
+                signIn()
+
+                createAlertDialog()
+                dialog?.show()
             }
 
             textViewAlreadyRegistered.setOnClickListener {
@@ -84,6 +105,20 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun createRequest() {
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken("333028136457-rt7ruul4gvk93381l8o98jbii30tpngt.apps.googleusercontent.com")
+            .requestEmail()
+            .build()
+
+        mGoogleSignInClient = GoogleSignIn.getClient(this, gso)
+    }
+
+    private fun signIn() {
+        val signInIntent = mGoogleSignInClient.signInIntent
+        startActivityForResult(signInIntent, RC_SIGN_IN)
+    }
+
     private fun createAlertDialog() {
         with(AlertDialog.Builder(this@MainActivity)) {
             setTitle("Регистрация пользователя")
@@ -102,12 +137,15 @@ class MainActivity : AppCompatActivity() {
             .addOnFailureListener { toastLong("Ошибка регистрации ${it.message}") }
     }
 
-    private fun registerUserOnDatabase(imageUrl: String) {
+    private fun registerUserOnDatabase(imageUrl: String, name: String = "") {
         val uid = FirebaseAuth.getInstance().uid ?: ""
         val ref = FirebaseDatabase.getInstance().getReference("/users/$uid")
-        val user = User(uid, binding.editTextUsernameRegistration.text.toString(), imageUrl)
+        val user = if (name == "") {
+            User(uid, binding.editTextUsernameRegistration.text.toString(), imageUrl)
+        }else {
+            User(uid, name, imageUrl)
+        }
         ref.setValue(user)
-        job!!.cancel()
         dialog?.dismiss()
 
         val intent = Intent(this@MainActivity, LatestMessagesActivity::class.java)
@@ -115,18 +153,34 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
-    private fun uploadImageInFirebaseStorage(email: String) {
+    private fun uploadImageInFirebaseStorage(email: String, name: String = "") {
         if (selectPhotoUri == null){
-            registerUserOnDatabase(ANONYMOUS_AVATAR_URL)
+            registerUserOnDatabase(ANONYMOUS_AVATAR_URL, name)
         }else {
             val ref = FirebaseStorage.getInstance().getReference("/avatars/$email")
             ref.putFile(selectPhotoUri!!)
                 .addOnSuccessListener {
                     ref.downloadUrl.addOnSuccessListener {
-                        registerUserOnDatabase(it.toString())
+                        registerUserOnDatabase(it.toString(), name)
                     }
                 }
         }
+    }
+
+    private fun firebaseAuthWithGoogle(idToken: String) {
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
+        auth.signInWithCredential(credential)
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    toast("Successfully registered with Google")
+                    val user = auth.currentUser
+                    val name = user!!.displayName
+                    val email = user.email
+                    uploadImageInFirebaseStorage(email = email!!, name = name!!)
+                } else {
+                    toast("Error with registration")
+                }
+            }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -143,6 +197,15 @@ class MainActivity : AppCompatActivity() {
             }
 
             binding.circleImageViewAvatarMainActivity.setImageBitmap(bitmap)
+        }else if (requestCode == RC_SIGN_IN) {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+            try {
+                // Google Sign In was successful, authenticate with Firebase
+                val account = task.getResult(ApiException::class.java)!!
+                firebaseAuthWithGoogle(account.idToken!!)
+            } catch (e: ApiException) {
+                Log.d("ErrorGoogleAuth","Error - $e")
+            }
         }
     }
 

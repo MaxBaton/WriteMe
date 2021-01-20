@@ -10,6 +10,43 @@
       "client_info": {
         "mobilesdk_app_id": "1:333028136457:android:ae010f7d1a65036fe38ad8",
         "android_client_info": {
+          "package_name": "com.example.messengeryoutube"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "333028136457-8rg69g9ijslki1gi8glhse08tji8d14v.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.messengeryoutube",
+            "certificate_hash": "9f608a1712882b869d9e2be91d82427d2fe99e4c"
+          }
+        },
+        {
+          "client_id": "333028136457-rt7ruul4gvk93381l8o98jbii30tpngt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCXjM-znQptTnWpaXlbUHokeO6zzAGiRbE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "333028136457-rt7ruul4gvk93381l8o98jbii30tpngt.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:333028136457:android:f783f7ca8d7e47f4e38ad8",
+        "android_client_info": {
           "package_name": "com.example.writeMe"
         }
       },
